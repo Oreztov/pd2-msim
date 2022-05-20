@@ -11,7 +11,7 @@ if not msim then
 		propsmax = 3,
 		propsowned = 2,
 		keys = {
-			menu = "m"
+			menu = "f8"
 		}
 	}
 
@@ -158,6 +158,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		border_bottom = true,
 		border_size = 5,
 		font_size = 25,
+		offset = {0, 0},
 		inherit_values = {
 			font_size = 25
 		}
@@ -166,10 +167,40 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 	local ownedtoolbar = ownedheader:GetToolbar()
 	local ownedcount = ownedtoolbar:Divider({
 		name = "ownedcount",
-		offset = {50, 0},
 		size_by_text = true,
 		text = tostring(msim.settings.propsowned) .. "/" .. tostring(msim.settings.propsmax) .. " Owned",
 		text_align = "right"
+	})
+
+	local ownedprop = self._menu:DivGroup({
+		border_bottom = true,
+		border_top = true,
+		border_right = true,
+		border_left = true,
+		border_size = 2,
+		align_method = "right",
+		font_size = 25,
+		offset = {0, 5},
+		inherit_values = {
+			font_size = 25
+		}
+	})
+
+	local ownedpropimage = ownedprop:Image({
+		name = "ownedpropimage",
+		texture = "assets/textures/mytexture",
+		icon_w = 256,
+		icon_h = 128
+	})
+
+	local ownedpropname = ownedprop:Divider({
+		name = "ownedpropname",
+		text = "The Tasteful Club"
+	})
+
+	local ownedpropvalue = ownedprop:Divider({
+		name = "ownedpropvalue",
+		text = "Value: " .. "319980" .. "$"
 	})
 
 end
