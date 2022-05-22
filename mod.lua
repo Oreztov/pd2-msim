@@ -15,6 +15,9 @@ if not msim then
 		}
 	}
 
+	dofile(ModPath .. "propertiestweakdata.lua")
+	PropertiesTweakData:init()
+
 	function msim:check_create_menu()
 
 		if self.menu then
