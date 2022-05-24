@@ -15,9 +15,6 @@ if not msim then
 		}
 	}
 
-	dofile(ModPath .. "propertiestweakdata.lua")
-	PropertiesTweakData:init()
-
 	function msim:check_create_menu()
 
 		if self.menu then
@@ -54,7 +51,9 @@ if not msim then
 		self._menu_w_right = menu_w - self._menu_w_left - self.menu_padding * 2
 
 		local menu = self.menu:Menu({
-			background_color = self.menu_background_color
+			background_color = self.menu_background_color,
+			h = self.menu.h,
+			auto_height = false
 		})
 
 		local navbar = menu:Holder({
@@ -72,6 +71,7 @@ if not msim then
 
 		local pageholder = menu:Holder({
 			name = "pageholder",
+			scrollbar = true,
 			align_method = "centered_grid",
 			offset = {50, 10},
 			inherit_values = {
@@ -175,36 +175,153 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		text_align = "right"
 	})
 
-	local ownedprop = self._menu:DivGroup({
+	for property, data in pairs(tweak_data.msim.properties) do
+			local ownedprop = self._menu:DivGroup({
+			border_bottom = true,
+			border_top = true,
+			border_right = true,
+			border_left = true,
+			border_size = 2,
+			align_method = "grid",
+			font_size = 25,
+			offset = {0, 5},
+			inherit_values = {
+				size_by_text = true,
+				font_size = 25,
+				align_method = "grid",
+			}
+		})
+
+		local ownedpropimage = ownedprop:Image({
+			name = "ownedpropimage",
+			texture = data.texture,
+			w = 256,
+			h = 128,
+			offset = {5, 0},
+			icon_w = 256,
+			icon_h = 128
+		})
+
+		local sellbutton = ownedpropimage:ImageButton({
+			name = "sellbutton",
+			texture = "textures/icons/sell",
+			w = 64,
+			h = 64
+		})
+
+		local ownedpropsell = ownedpropimage:Button({
+			name = "ownedpropsell",
+			text = "Sell",
+
+		})
+
+		local ownedpropnamevaluegroup = ownedprop:DivGroup({
+			name = "ownedpropnamevaluegroup",
+			text = data.text,
+			w = 512,
+			h = 128,
+			offset = {5, 0},
+			inherit_values = {
+				size_by_text = false,
+				w = 256
+			}
+		})
+
+		local ownedpropvalue = ownedpropnamevaluegroup:Divider({
+			name = "ownedpropvalue",
+			text = "Value: " .. data.value .. "$",
+			font_size = 40
+		})
+
+		local ownedpropfeature = ownedprop:Divider({
+			name = "ownedpropfeature",
+			text = data.feature,
+			text_align = "center",
+			font_size = 40
+		})
+	end
+
+	local availableheader = self._menu:DivGroup({
+		name = "availableheader",
+		text = "Available Properties",
+		align_method = "centered_grid",
 		border_bottom = true,
-		border_top = true,
-		border_right = true,
-		border_left = true,
-		border_size = 2,
-		align_method = "right",
+		border_size = 5,
 		font_size = 25,
-		offset = {0, 5},
+		offset = {0, 10},
 		inherit_values = {
 			font_size = 25
 		}
 	})
-
-	local ownedpropimage = ownedprop:Image({
-		name = "ownedpropimage",
-		texture = "assets/textures/mytexture",
-		icon_w = 256,
-		icon_h = 128
+	
+	local availabletoolbar = availableheader:GetToolbar()
+	local availablecount = availabletoolbar:Divider({
+		name = "availablecount",
+		size_by_text = true,
+		offset = {0, 0},
+		text = tostring(msim.settings.propsavailable) .. "/" .. tostring(msim.settings.propsmax) .. " available",
+		text_align = "right"
 	})
-
-	local ownedpropname = ownedprop:Divider({
-		name = "ownedpropname",
-		text = "The Tasteful Club"
-	})
-
-	local ownedpropvalue = ownedprop:Divider({
-		name = "ownedpropvalue",
-		text = "Value: " .. "319980" .. "$"
-	})
+	
+	for property, data in pairs(tweak_data.msim.properties) do
+			local availableprop = self._menu:DivGroup({
+			border_bottom = true,
+			border_top = true,
+			border_right = true,
+			border_left = true,
+			border_size = 2,
+			align_method = "grid",
+			font_size = 25,
+			offset = {0, 5},
+			inherit_values = {
+				size_by_text = true,
+				font_size = 25,
+				align_method = "grid",
+			}
+		})
+	
+		local availablepropimage = availableprop:Image({
+			name = "availablepropimage",
+			texture = data.texture,
+			w = 256,
+			h = 128,
+			offset = {5, 0},
+			icon_w = 256,
+			icon_h = 128
+		})
+		
+		local buybutton = availablepropimage:ImageButton({
+			name = "buybutton",
+			texture = "textures/icons/buy",
+			w = 64,
+			h = 64
+		})
+	
+		local availablepropnamevaluegroup = availableprop:DivGroup({
+			name = "availablepropnamevaluegroup",
+			text = data.text,
+			w = 512,
+			h = 128,
+			offset = {5, 0},
+			inherit_values = {
+				size_by_text = false,
+				w = 256
+			}
+		})
+	
+		local availablepropvalue = availablepropnamevaluegroup:Divider({
+			name = "availablepropvalue",
+			text = "Value: " .. data.value .. "$",
+			font_size = 40
+		})
+	
+		local availablepropfeature = availableprop:Divider({
+			name = "availablepropfeature",
+			text = data.feature,
+			text_align = "center",
+			font_size = 40
+		})
+	end
 
 end
 

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<mod>
+    <assets base_path="assets/">
+        <group name="textures/properties/">
+            <file :name="template.texture"/>
+        </group>
+        <group name="textures/icons/">
+            <file :name="buy.texture"/>
+            <file :name="sell.texture"/>
+        </group>
+    </assets>
+</mod>
