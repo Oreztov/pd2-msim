@@ -202,13 +202,6 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			icon_h = 128
 		})
 
-		local sellbutton = ownedpropimage:ImageButton({
-			name = "sellbutton",
-			texture = "textures/icons/sell",
-			w = 64,
-			h = 64
-		})
-
 		local ownedpropsell = ownedpropimage:Button({
 			name = "ownedpropsell",
 			text = "Sell",
@@ -230,14 +223,21 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		local ownedpropvalue = ownedpropnamevaluegroup:Divider({
 			name = "ownedpropvalue",
 			text = "Value: " .. data.value .. "$",
-			font_size = 40
+			font_size = 27
+		})
+
+		local sellbutton = ownedpropnamevaluegroup:ImageButton({
+			name = "sellbutton",
+			texture = "textures/icons/sell",
+			w = 64,
+			h = 64
 		})
 
 		local ownedpropfeature = ownedprop:Divider({
 			name = "ownedpropfeature",
 			text = data.feature,
 			text_align = "center",
-			font_size = 40
+			font_size = 30
 		})
 	end
 
@@ -289,13 +289,6 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			icon_w = 256,
 			icon_h = 128
 		})
-		
-		local buybutton = availablepropimage:ImageButton({
-			name = "buybutton",
-			texture = "textures/icons/buy",
-			w = 64,
-			h = 64
-		})
 	
 		local availablepropnamevaluegroup = availableprop:DivGroup({
 			name = "availablepropnamevaluegroup",
@@ -312,14 +305,21 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		local availablepropvalue = availablepropnamevaluegroup:Divider({
 			name = "availablepropvalue",
 			text = "Value: " .. data.value .. "$",
-			font_size = 40
+			font_size = 27
+		})
+
+		local buybutton = availablepropnamevaluegroup:ImageButton({
+			name = "buybutton",
+			texture = "textures/icons/buy",
+			w = 64,
+			h = 64
 		})
 	
 		local availablepropfeature = availableprop:Divider({
 			name = "availablepropfeature",
 			text = data.feature,
 			text_align = "center",
-			font_size = 40
+			font_size = 30
 		})
 	end
 
