@@ -56,6 +56,7 @@ if not msim then
 			auto_height = false
 		})
 
+		navbar_font_size = 40
 		local navbar = menu:Holder({
 			name = "navbar",
 			align_method = "grid",
@@ -82,14 +83,32 @@ if not msim then
 		self._pages = {
 			props = MSIMPropertyPage:new(self, navbar, pageholder),
 			xchange = MSIMExchangePage:new(self, navbar, pageholder),
-			stats = MSIMStatisticsPage:new(self, navbar, pageholder)
+			stats = MSIMStatisticsPage:new(self, navbar, pageholder),
+			options = MSIMOptionsPage:new(self, navbar, pageholder)
 		}
+
+		self.msim_logo = navbar:Image({
+			name = "msim_logo",
+			offset = {0,0},
+			w = 512,
+			h = 64,
+			texture = "textures/icons/msim_logo"
+		})
 
 		self.pp_text = navbar:Divider({
 			name = "pp_text",
-			position = "Right",
-			text = "PP: " ..tostring(msim.settings.pp) .."%"
+			text = "PP: " ..tostring(msim.settings.pp) .."%",
+			offset = 20,
+			font_size = navbar_font_size
 		})
+
+		self.plus_button = navbar:ImageButton({
+			name = "plus_button",
+			w = 32,
+			h = 32,
+			texture = "textures/icons/plus"
+		})
+
 	end
 
 	function msim:switch_pages(pagename, item)
@@ -98,8 +117,6 @@ if not msim then
 			page._button:SetBorder({top = pagename == name})
 		end
 	end
-
-	local floor = math.floor
 
 	function msim:set_menu_state(enabled)
 		self:check_create_menu()
@@ -145,7 +162,8 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		text = "Properties",
 		border_size = 3,
 		border_top = true,
-		on_callback = ClassClbk(parent, "switch_pages", "props")
+		on_callback = ClassClbk(parent, "switch_pages", "props"),
+		font_size = navbar_font_size
 	})
 
 	self._menu = pageholder:Menu({
@@ -160,10 +178,10 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		align_method = "centered_grid",
 		border_bottom = true,
 		border_size = 5,
-		font_size = 25,
+		font_size = 35,
 		offset = {0, 0},
 		inherit_values = {
-			font_size = 25
+			font_size = 35
 		}
 	})
 
@@ -200,12 +218,6 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			offset = {5, 0},
 			icon_w = 256,
 			icon_h = 128
-		})
-
-		local ownedpropsell = ownedpropimage:Button({
-			name = "ownedpropsell",
-			text = "Sell",
-
 		})
 
 		local ownedpropnamevaluegroup = ownedprop:DivGroup({
@@ -247,10 +259,10 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		align_method = "centered_grid",
 		border_bottom = true,
 		border_size = 5,
-		font_size = 25,
+		font_size = 35,
 		offset = {0, 10},
 		inherit_values = {
-			font_size = 25
+			font_size = 35
 		}
 	})
 	
@@ -332,7 +344,8 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		name = "Exchange",
 		text = "Exchange",
 		border_size = 3,
-		on_callback = ClassClbk(parent, "switch_pages", "xchange")
+		on_callback = ClassClbk(parent, "switch_pages", "xchange"),
+		font_size = navbar_font_size
 	})
 
 	self._menu = pageholder:Menu({
@@ -350,11 +363,31 @@ function MSIMStatisticsPage:init(parent, navbar, pageholder)
 		name = "Statistics",
 		text = "Statistics",
 		border_size = 3,
-		on_callback = ClassClbk(parent, "switch_pages", "stats")
+		on_callback = ClassClbk(parent, "switch_pages", "stats"),
+		font_size = navbar_font_size
 	})
 
 	self._menu = pageholder:Menu({
 		name = "statsholder",
+		scrollbar = true,
+		auto_height = true,
+		visible = "false"
+	})
+end
+
+MSIMOptionsPage = MSIMOptionsPage or class()
+
+function MSIMOptionsPage:init(parent, navbar, pageholder)
+	self._button = navbar:Button({
+		name = "Options",
+		text = "Options",
+		border_size = 3,
+		on_callback = ClassClbk(parent, "switch_pages", "options"),
+		font_size = navbar_font_size
+	})
+
+	self._menu = pageholder:Menu({
+		name = "optionsholder",
 		scrollbar = true,
 		auto_height = true,
 		visible = "false"
