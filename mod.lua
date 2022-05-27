@@ -8,8 +8,18 @@ if not msim then
 	msim.save_path = SavePath
 	msim.settings = {
 		pp = 73,
+		pprr = 15,
 		propsmax = 3,
-		propsowned = 2,
+		propsownedcount = 1,
+		propsowned = {
+			"template"
+		},
+		propsavailablecount = 3,
+		propsavailable = {
+			"nightclub",
+			"jewstore",
+			"yacht"
+		},
 		keys = {
 			menu = "f8"
 		}
@@ -137,8 +147,9 @@ if not msim then
 			id = "msimMenu",
 			title = "msim_menu_main_name",
 			desc = "msim_menu_main_desc",
-			node_name = "blt_options",
-			callback = "msim_open_menu"
+			node_name = "main",
+			callback = "msim_open_menu",
+			position = 8
 		})
 
 		local mod = BLT.Mods:GetMod(msim.mod_path:gsub(".+/(.+)/$", "%1"))
@@ -189,11 +200,14 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 	local ownedcount = ownedtoolbar:Divider({
 		name = "ownedcount",
 		size_by_text = true,
-		text = tostring(msim.settings.propsowned) .. "/" .. tostring(msim.settings.propsmax) .. " Owned",
+		text = tostring(msim.settings.propsownedcount) .. "/" .. tostring(msim.settings.propsmax) .. " Owned",
 		text_align = "right"
 	})
+	
+	for index, prop in ipairs(msim.settings.propsowned) do
 
-	for property, data in pairs(tweak_data.msim.properties) do
+		data = tweak_data.msim.properties[prop]
+
 			local ownedprop = self._menu:DivGroup({
 			border_bottom = true,
 			border_top = true,
@@ -271,11 +285,15 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		name = "availablecount",
 		size_by_text = true,
 		offset = {0, 0},
-		text = tostring(msim.settings.propsavailable) .. "/" .. tostring(msim.settings.propsmax) .. " available",
+		text = tostring(msim.settings.propsavailablecount) .. " Available",
 		text_align = "right"
 	})
 	
-	for property, data in pairs(tweak_data.msim.properties) do
+	
+	for index, prop in ipairs(msim.settings.propsavailable) do
+
+		data = tweak_data.msim.properties[prop]
+
 			local availableprop = self._menu:DivGroup({
 			border_bottom = true,
 			border_top = true,
