@@ -25,11 +25,32 @@ if not msim then
 		}
 	}
 
+	function msim:save(f)
+		local file = io.open(self.save_path .. "msim_settings.txt", "w+")
+		if file then
+			file:write(json.encode(self.settings))
+			file:close()
+		end
+	end
+
+	function msim:load()
+		local file = io.open(self.save_path .. "msim_settings.txt", "r")
+		if file then
+			local data = json.decode(file:read("*all"))
+			file:close()
+			for k, v in pairs(data) do
+				self.settings[k] = v
+			end
+		end
+	end
+
 	function msim:check_create_menu()
 
 		if self.menu then
 			return
 		end
+
+		self:load()
 
 		self.menu_title_size = 22
 		self.menu_items_size = 18
@@ -135,6 +156,20 @@ if not msim then
 		elseif not enabled then
 			self.menu:Disable()
 		end
+	end
+
+	function msim:buy_property(property, navbar, pageholder)
+		table.remove(msim.settings.propsavailable, 1, property)
+		table.insert(msim.settings.propsowned, 1, property)
+		self:save()
+		self._pages.props = MSIMPropertyPage:new(self, navbar, pageholder)
+	end
+
+	function msim:sell_property(property)
+		table.remove(msim.settings.propsowned, 1, property)
+		table.insert(msim.settings.propsavailable, 1, property)
+		self:save()
+		self.menu:RecreateItems()
 	end
 
 	Hooks:Add("MenuManagerPostInitialize", "MenuManagerPostInitializemsim", function(menu_manager, nodes)
@@ -256,7 +291,8 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			name = "sellbutton",
 			texture = "textures/icons/sell",
 			w = 64,
-			h = 64
+			h = 64,
+			on_callback = ClassClbk(parent, "sell_property", prop)
 		})
 
 		local ownedpropfeature = ownedprop:Divider({
@@ -342,7 +378,8 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			name = "buybutton",
 			texture = "textures/icons/buy",
 			w = 64,
-			h = 64
+			h = 64,
+			on_callback = ClassClbk(parent, "buy_property", prop, navbar, pageholder)
 		})
 	
 		local availablepropfeature = availableprop:Divider({
