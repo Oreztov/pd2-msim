@@ -159,17 +159,26 @@ if not msim then
 	end
 
 	function msim:buy_property(property, navbar, pageholder)
-		table.remove(msim.settings.propsavailable, 1, property)
+		for i, v in ipairs(msim.settings.propsavailable) do
+			if v == property then
+				table.remove(msim.settings.propsavailable, i, v)
+				break
+			end
+		end
+		
 		table.insert(msim.settings.propsowned, 1, property)
+		table.sort(msim.settings.propsowned)
 		self:save()
-		self._pages.props = MSIMPropertyPage:new(self, navbar, pageholder)
+
+		self._pages.props._menu:Destroy()
+		self._pages.props._menu:RecreateItems()
 	end
 
 	function msim:sell_property(property)
 		table.remove(msim.settings.propsowned, 1, property)
 		table.insert(msim.settings.propsavailable, 1, property)
 		self:save()
-		self.menu:RecreateItems()
+		self.menu:Recreate()
 	end
 
 	Hooks:Add("MenuManagerPostInitialize", "MenuManagerPostInitializemsim", function(menu_manager, nodes)
