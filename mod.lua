@@ -158,7 +158,7 @@ if not msim then
 		end
 	end
 
-	function msim:buy_property(property, navbar, pageholder)
+	function msim:buy_property(property)
 		for i, v in ipairs(msim.settings.propsavailable) do
 			if v == property then
 				table.remove(msim.settings.propsavailable, i, v)
@@ -168,17 +168,34 @@ if not msim then
 		
 		table.insert(msim.settings.propsowned, 1, property)
 		table.sort(msim.settings.propsowned)
+		msim.settings.propsownedcount = msim.settings.propsownedcount + 1
+		msim.settings.propsavailablecount = msim.settings.propsavailablecount - 1
 		self:save()
 
-		self._pages.props._menu:Destroy()
-		self._pages.props._menu:RecreateItems()
+		self.menu:Destroy()
+		self.menu = false
+		msim:check_create_menu()
+		msim:set_menu_state(true)
 	end
 
 	function msim:sell_property(property)
-		table.remove(msim.settings.propsowned, 1, property)
+		for i, v in ipairs(msim.settings.propsowned) do
+			if v == property then
+				table.remove(msim.settings.propsowned, i, v)
+				break
+			end
+		end
+
 		table.insert(msim.settings.propsavailable, 1, property)
+		table.sort(msim.settings.propsavailable)
+		msim.settings.propsavailablecount = msim.settings.propsavailablecount + 1
+		msim.settings.propsownedcount = msim.settings.propsownedcount - 1
 		self:save()
-		self.menu:Recreate()
+
+		self.menu:Destroy()
+		self.menu = false
+		msim:check_create_menu()
+		msim:set_menu_state(true)
 	end
 
 	Hooks:Add("MenuManagerPostInitialize", "MenuManagerPostInitializemsim", function(menu_manager, nodes)
