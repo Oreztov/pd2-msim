@@ -15,11 +15,7 @@ if not msim then
 			"template"
 		},
 		propsavailablecount = 3,
-		propsavailable = {
-			"nightclub",
-			"jewstore",
-			"yacht"
-		},
+		propsavailable = {},
 		keys = {
 			menu = "f8"
 		}
@@ -52,7 +48,10 @@ if not msim then
 			return
 		end
 
+		self:pick_available_props(3)
+
 		self:load()
+		self:save()
 
 		self.menu_title_size = 22
 		self.menu_items_size = 18
@@ -195,6 +194,25 @@ if not msim then
 		local newvalue = value * multiplier
 
 		return math.max(newvalue, min_value)
+	end
+
+	function msim:pick_available_props(amount)
+		local keys = {}
+		local add = true
+		for prop, data in pairs(tweak_data.msim.properties) do
+			add = true
+			for i, v in ipairs(msim.settings.propsowned) do
+				if v == prop then
+					add = false
+				end
+			end
+			if add then table.insert(keys, 1, prop) end
+		end
+
+		msim.settings.propsavailable = {}
+		for i = 1, amount do
+			table.insert(msim.settings.propsavailable, 1, keys[math.random(#keys)])
+		end
 	end
 
 	function msim:make_money_string(price)
@@ -591,3 +609,9 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 		visible = "false"
 	})
 end
+
+Hooks:PostHook(MissionEndState, 'at_enter', 'msim_getendstate',
+function()
+	msim:pick_available_props(3)
+	msim:save()
+end)
