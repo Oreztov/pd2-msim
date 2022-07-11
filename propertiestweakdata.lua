@@ -11,28 +11,32 @@ function PropertiesTweakData:init()
 		self.properties.nightclub = {
 			texture = "guis/dlcs/bro/textures/pd2/crimenet/nightclub",
 			text = "nightclub",
-			value = 12345,
+			value = 25,
+			min_value = 25000,
 			feature = "N/A"
 		}
 
 		self.properties.jewstore = {
 			texture = "guis/dlcs/bro/textures/pd2/crimenet/jewelrystore",
 			text = "jewstore",
-			value = 42069,
+			value = 10,
+			min_value = 100000,
 			feature = "N/A 2"
 		}
 
 		self.properties.yacht = {
 			texture = "guis/dlcs/bro/textures/pd2/crimenet/yacht",
 			text = "yacht",
-			value = 1000000,
+			value = 150,
+			min_value = 70000000000,
 			feature = "N/A 3"
 		}
 
 		self.properties.template = {
 			texture = "textures/properties/template",
 			text = "template",
-			value = 7,
+			value = 1,
+			min_value = 7,
 			feature = "TODO"
 		}
 end

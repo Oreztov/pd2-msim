@@ -25,6 +25,8 @@ if not msim then
 		}
 	}
 
+	RATIO = 150
+
 	function msim:save(f)
 		local file = io.open(self.save_path .. "msim_settings.txt", "w+")
 		if file then
@@ -158,27 +160,69 @@ if not msim then
 		end
 	end
 
-	function msim:buy_property(property)
-		for i, v in ipairs(msim.settings.propsavailable) do
-			if v == property then
-				table.remove(msim.settings.propsavailable, i, v)
-				break
-			end
-		end
-		
-		table.insert(msim.settings.propsowned, 1, property)
-		table.sort(msim.settings.propsowned)
-		msim.settings.propsownedcount = msim.settings.propsownedcount + 1
-		msim.settings.propsavailablecount = msim.settings.propsavailablecount - 1
-		self:save()
-
+	function msim:refresh()
 		self.menu:Destroy()
 		self.menu = false
 		msim:check_create_menu()
 		msim:set_menu_state(true)
 	end
 
+	function msim:error_message(msg)
+		local diag = MenuDialog:new({
+			accent_color = self.menu_accent_color,
+			highlight_color = self.menu_highlight_color,
+			background_color = self.menu_background_color,
+			text_offset = {self.menu_padding, self.menu_padding / 4},
+			size = self.menu_items_size,
+			items_size = self.menu_items_size,
+			font_size = 25,
+		})
+		diag:Show({
+			title = "Illegal Action!",
+			message = msg,
+			w = self.menu._panel:w() / 2,
+			title_merge = {
+				size = self.menu_title_size
+			}})
+	end
+
+	function msim:get_actual_value(property)
+		local value = tweak_data.msim.properties[property].value
+		local min_value = tweak_data.msim.properties[property].min_value
+		local money = managers.money:total()
+		
+		local multiplier = math.round(money / RATIO)
+		local newvalue = value * multiplier
+
+		return math.max(newvalue, min_value)
+	end
+
+	function msim:make_money_string(price)
+		return managers.money._cash_sign .. managers.money:add_decimal_marks_to_string(tostring(price))
+	end
+
+	function msim:buy_property(property)
+		managers.money:_deduct_from_total(msim:get_actual_value(property), "msim")
+
+		for i, v in ipairs(msim.settings.propsavailable) do
+			if v == property then
+				table.remove(msim.settings.propsavailable, i, v)
+				break
+			end
+		end
+
+		table.insert(msim.settings.propsowned, 1, property)
+		table.sort(msim.settings.propsowned)
+		msim.settings.propsownedcount = msim.settings.propsownedcount + 1
+		msim.settings.propsavailablecount = msim.settings.propsavailablecount - 1
+		self:save()
+
+		msim:refresh()
+	end
+
 	function msim:sell_property(property)
+		managers.money:_add_to_total(msim:get_actual_value(property), {no_offshore = true}, "msim")
+
 		for i, v in ipairs(msim.settings.propsowned) do
 			if v == property then
 				table.remove(msim.settings.propsowned, i, v)
@@ -192,10 +236,83 @@ if not msim then
 		msim.settings.propsownedcount = msim.settings.propsownedcount - 1
 		self:save()
 
-		self.menu:Destroy()
-		self.menu = false
-		msim:check_create_menu()
-		msim:set_menu_state(true)
+		msim:refresh()
+	end
+
+	function msim:confirm_prop_transac(property, mode)
+		local diag = MenuDialog:new({
+			accent_color = self.menu_accent_color,
+			highlight_color = self.menu_highlight_color,
+			background_color = self.menu_background_color,
+			text_offset = {self.menu_padding, self.menu_padding / 4},
+			size = self.menu_items_size,
+			items_size = self.menu_items_size,
+			font_size = 25
+		})
+		if mode == "buy" then
+			diag:Show({
+				title = "Confirm Transaction",
+				message = "Are you sure you want to buy " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?",
+				w = self.menu._panel:w() / 2,
+				yes = false,
+				title_merge = {
+					size = self.menu_title_size
+				},
+				create_items = function (menu)
+					menu:Button({
+						text = "dialog_yes",
+						text_align = "center",
+						localized = true,
+						on_callback = function (item)
+							if managers.money:total() < msim:get_actual_value(property) then
+								diag:hide()
+								msim:error_message("Simply a lack of funds")
+							else
+								diag:hide()
+								msim:buy_property(property)
+							end
+						end
+					})
+					menu:Button({
+						text = "dialog_no",
+						text_align = "center",
+						localized = true,
+						on_callback = function (item)
+							diag:hide()
+						end
+					})
+				end
+			})
+		elseif mode == "sell" then
+			diag:Show({
+				title = "Confirm Transaction",
+				message = "Are you sure you want to sell " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?",
+				w = self.menu._panel:w() / 2,
+				yes = false,
+				title_merge = {
+					size = self.menu_title_size
+				},
+				create_items = function (menu)
+					menu:Button({
+						text = "dialog_yes",
+						text_align = "center",
+						localized = true,
+						on_callback = function (item)
+							diag:hide()
+							msim:sell_property(property)
+						end
+					})
+					menu:Button({
+						text = "dialog_no",
+						text_align = "center",
+						localized = true,
+						on_callback = function (item)
+							diag:hide()
+						end
+					})
+				end
+			})
+		end
 	end
 
 	Hooks:Add("MenuManagerPostInitialize", "MenuManagerPostInitializemsim", function(menu_manager, nodes)
@@ -309,7 +426,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 
 		local ownedpropvalue = ownedpropnamevaluegroup:Divider({
 			name = "ownedpropvalue",
-			text = "Value: " .. data.value .. "$",
+			text = "Value: " .. msim:make_money_string(msim:get_actual_value(prop)),
 			font_size = 27
 		})
 
@@ -318,7 +435,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			texture = "textures/icons/sell",
 			w = 64,
 			h = 64,
-			on_callback = ClassClbk(parent, "sell_property", prop)
+			on_callback = ClassClbk(parent, "confirm_prop_transac", prop, "sell")
 		})
 
 		local ownedpropfeature = ownedprop:Divider({
@@ -396,7 +513,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 	
 		local availablepropvalue = availablepropnamevaluegroup:Divider({
 			name = "availablepropvalue",
-			text = "Value: " .. data.value .. "$",
+			text = "Value: " .. msim:make_money_string(msim:get_actual_value(prop)),
 			font_size = 27
 		})
 
@@ -405,7 +522,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			texture = "textures/icons/buy",
 			w = 64,
 			h = 64,
-			on_callback = ClassClbk(parent, "buy_property", prop, navbar, pageholder)
+			on_callback = ClassClbk(parent, "confirm_prop_transac", prop, "buy")
 		})
 	
 		local availablepropfeature = availableprop:Divider({
