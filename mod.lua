@@ -9,7 +9,7 @@ if not msim then
 	msim.settings = {
 		pp = 73,
 		pprr = 15,
-		propsmax = 3,
+		propsownedmax = 3,
 		propsownedcount = 1,
 		propsowned = {
 			"template"
@@ -197,6 +197,8 @@ if not msim then
 	end
 
 	function msim:pick_available_props(amount)
+		msim.settings.propsavailablecount = amount
+
 		local keys = {}
 		local add = true
 		for prop, data in pairs(tweak_data.msim.properties) do
@@ -210,8 +212,10 @@ if not msim then
 		end
 
 		msim.settings.propsavailable = {}
-		for i = 1, amount do
-			table.insert(msim.settings.propsavailable, 1, keys[math.random(#keys)])
+		for n = 1, amount do
+			local i = math.random(#keys)
+			table.insert(msim.settings.propsavailable, 1, keys[i])
+			table.remove(keys, i)
 		end
 	end
 
@@ -224,7 +228,7 @@ if not msim then
 
 		for i, v in ipairs(msim.settings.propsavailable) do
 			if v == property then
-				table.remove(msim.settings.propsavailable, i, v)
+				table.remove(msim.settings.propsavailable, i)
 				break
 			end
 		end
@@ -283,12 +287,13 @@ if not msim then
 						localized = true,
 						on_callback = function (item)
 							if managers.money:total() < msim:get_actual_value(property) then
-								diag:hide()
 								msim:error_message("Simply a lack of funds")
+							elseif msim.settings.propsownedcount == msim.settings.propsownedmax then
+								msim:error_message("You already own the maximum amount of properties!")
 							else
-								diag:hide()
 								msim:buy_property(property)
 							end
+							diag:hide()
 						end
 					})
 					menu:Button({
@@ -396,7 +401,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 	local ownedcount = ownedtoolbar:Divider({
 		name = "ownedcount",
 		size_by_text = true,
-		text = tostring(msim.settings.propsownedcount) .. "/" .. tostring(msim.settings.propsmax) .. " Owned",
+		text = tostring(msim.settings.propsownedcount) .. "/" .. tostring(msim.settings.propsownedmax) .. " Owned",
 		text_align = "right"
 	})
 	
@@ -612,6 +617,7 @@ end
 
 Hooks:PostHook(MissionEndState, 'at_enter', 'msim_getendstate',
 function()
+	msim:load()
 	msim:pick_available_props(3)
 	msim:save()
 end)
