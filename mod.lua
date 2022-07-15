@@ -7,7 +7,7 @@ if not msim then
 	msim.mod_path = ModPath
 	msim.save_path = SavePath
 	msim.settings = {
-		pp = 73,
+		pp = 100,
 		pprr = 15,
 		propsownedmax = 3,
 		propsownedcount = 1,
@@ -20,8 +20,6 @@ if not msim then
 			menu = "f8"
 		}
 	}
-
-	RATIO = 150
 
 	function msim:save(f)
 		local file = io.open(self.save_path .. "msim_settings.txt", "w+")
@@ -88,7 +86,7 @@ if not msim then
 			auto_height = false
 		})
 
-		navbar_font_size = 40
+		navbar_font_size = 37
 		local navbar = menu:Holder({
 			name = "navbar",
 			align_method = "grid",
@@ -115,7 +113,7 @@ if not msim then
 		self._pages = {
 			props = MSIMPropertyPage:new(self, navbar, pageholder),
 			xchange = MSIMExchangePage:new(self, navbar, pageholder),
-			stats = MSIMStatisticsPage:new(self, navbar, pageholder),
+			info = MSIMInformationPage:new(self, navbar, pageholder),
 			options = MSIMOptionsPage:new(self, navbar, pageholder)
 		}
 
@@ -190,7 +188,7 @@ if not msim then
 		local min_value = tweak_data.msim.properties[property].min_value
 		local money = managers.money:total()
 		
-		local multiplier = math.round(money / RATIO)
+		local multiplier = math.round(money / 100)
 		local newvalue = value * multiplier
 
 		return math.max(newvalue, min_value)
@@ -237,6 +235,7 @@ if not msim then
 		table.sort(msim.settings.propsowned)
 		msim.settings.propsownedcount = msim.settings.propsownedcount + 1
 		msim.settings.propsavailablecount = msim.settings.propsavailablecount - 1
+		msim.settings.pp = msim.settings.pp - tweak_data.msim.properties[property].value
 		self:save()
 
 		msim:refresh()
@@ -274,7 +273,7 @@ if not msim then
 		if mode == "buy" then
 			diag:Show({
 				title = "Confirm Transaction",
-				message = "Are you sure you want to buy " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?",
+				message = "Are you sure you want to buy " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?\nThis will use " .. tweak_data.msim.properties[property].value .. "% of your Purchasing Power.",
 				w = self.menu._panel:w() / 2,
 				yes = false,
 				title_merge = {
@@ -290,6 +289,8 @@ if not msim then
 								msim:error_message("Simply a lack of funds")
 							elseif msim.settings.propsownedcount == msim.settings.propsownedmax then
 								msim:error_message("You already own the maximum amount of properties!")
+							elseif msim.settings.pp < tweak_data.msim.properties[property].value then
+								msim:error_message("You don't have enough Purchasing Power (PP)!")
 							else
 								msim:buy_property(property)
 							end
@@ -336,6 +337,18 @@ if not msim then
 				end
 			})
 		end
+	end
+
+	function msim:convert_currencies(mode, value1, value2)
+		log("hi")
+		if mode == "oftosp" then
+			log("in")
+			managers.money:_deduct_from_offshore(value1)
+			managers.money:_add_to_total(value2, {no_offshore = true}, "msim")
+			log("wow?")
+		end
+		msim:save()
+		msim:refresh()
 	end
 
 	Hooks:Add("MenuManagerPostInitialize", "MenuManagerPostInitializemsim", function(menu_manager, nodes)
@@ -573,23 +586,243 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		name = "xchangeholder",
 		scrollbar = true,
 		auto_height = true,
-		visible = "false"
+		visible = "false",
+		inherit_values = {
+			offset = {0, 25}
+		}
+	})
+
+
+	local oftospbox = self._menu:DivGroup({
+		border_bottom = true,
+		border_top = true,
+		border_right = true,
+		border_left = true,
+		border_size = 2,
+		align_method = "centered_grid",
+		font_size = 25,
+		max_height = 512,
+		w = 1152,
+		inherit_values = {
+			size_by_text = true,
+			font_size = 30,
+			offset = {5, 0},
+			align_method = "centered_grid"
+		}
+	})
+
+	self.oftospslider1 = oftospbox:Slider({
+		name = "Offshore Funds",
+		min = 1,
+		max = managers.money:offshore(),
+		value = 1,
+		floats = 0,
+		wheel_control = true,
+		on_callback = function ()
+			self.oftospslider2:SetValueByPercentage(self.oftospslider1.value / self.oftospslider1.max, false)
+		end
+	})
+
+	local oftospimage1 = oftospbox:Image({
+		texture = "textures/icons/offshore",
+		w = 64,
+		h = 64
+	})
+
+	local oftosparrow = oftospbox:Image({
+		texture = "guis/textures/pd2/arrow_downcounter",
+		w = 64,
+		h = 64,
+		icon_rotation = 90
+	})
+
+	local oftospimage2 = oftospbox:Image({
+		texture = "guis/textures/pd2/blackmarket/cash_drop",
+		w = 64,
+		h = 64
+	})
+
+	local oftospbutton = oftospbox:ImageButton({
+		name = "oftospbutton",
+		texture = "textures/icons/convert",
+		position = "Right",
+		w = 128,
+		h = 64,
+		on_callback = function ()
+			msim:convert_currencies("oftosp", self.oftospslider1.value, self.oftospslider2.value)
+		end
+	})
+
+	self.oftospslider2 = oftospbox:Slider({
+		name = "Spending Cash",
+		min = 1,
+		max = managers.money:total(),
+		value = 1,
+		floats = 0,
+		wheel_control = true,
+		on_callback = function ()
+			self.oftospslider1:SetValueByPercentage(self.oftospslider2.value / self.oftospslider2.max, false)
+		end
+	})
+
+	local sptoccbox = self._menu:DivGroup({
+		border_bottom = true,
+		border_top = true,
+		border_right = true,
+		border_left = true,
+		border_size = 2,
+		align_method = "centered_grid",
+		font_size = 25,
+		max_height = 512,
+		w = 1152,
+		inherit_values = {
+			size_by_text = true,
+			font_size = 30,
+			offset = {5, 0},
+			align_method = "centered_grid"
+		}
+	})
+	
+	self.sptoccslider1 = sptoccbox:Slider({
+		name = "Spending Cash",
+		min = 1,
+		max = managers.money:offshore(),
+		value = 1,
+		floats = 0,
+		wheel_control = true,
+		on_callback = function ()
+			self.sptoccslider2:SetValueByPercentage(self.sptoccslider1.value / self.sptoccslider1.max, false)
+		end
+	})
+	
+	local sptoccimage1 = sptoccbox:Image({
+		texture = "guis/textures/pd2/blackmarket/cash_drop",
+		w = 64,
+		h = 64
+	})
+	
+	local sptoccarrow = sptoccbox:Image({
+		texture = "guis/textures/pd2/arrow_downcounter",
+		w = 64,
+		h = 64,
+		icon_rotation = 90
+	})
+	
+	local sptoccimage2 = sptoccbox:Image({
+		texture = "guis/dlcs/chill/textures/pd2/safehouse/continental_coins_drop",
+		w = 64,
+		h = 64
+	})
+	
+	local sptoccbutton = sptoccbox:ImageButton({
+		name = "sptoccbutton",
+		texture = "textures/icons/convert",
+		position = "Right",
+		w = 128,
+		h = 64,
+		on_callback = function ()
+			msim:convert_currencies("sptocc", self.sptoccslider1.value, self.sptoccslider2.value)
+		end
+	})
+	
+	self.sptoccslider2 = sptoccbox:Slider({
+		name = "Continental Coins",
+		min = 1,
+		max = managers.money:total(),
+		value = 1,
+		floats = 0,
+		wheel_control = true,
+		on_callback = function ()
+			self.sptoccslider1:SetValueByPercentage(self.sptoccslider2.value / self.sptoccslider2.max, false)
+		end
+	})
+
+	local sptoxpbox = self._menu:DivGroup({
+		border_bottom = true,
+		border_top = true,
+		border_right = true,
+		border_left = true,
+		border_size = 2,
+		align_method = "centered_grid",
+		font_size = 25,
+		max_height = 512,
+		w = 1152,
+		inherit_values = {
+			size_by_text = true,
+			font_size = 30,
+			offset = {5, 0},
+			align_method = "centered_grid"
+		}
+	})
+	
+	self.sptoxpslider1 = sptoxpbox:Slider({
+		name = "Spending Cash",
+		min = 1,
+		max = managers.money:offshore(),
+		value = 1,
+		floats = 0,
+		wheel_control = true,
+		on_callback = function ()
+			self.sptoxpslider2:SetValueByPercentage(self.sptoxpslider1.value / self.sptoxpslider1.max, false)
+		end
+	})
+	
+	local sptoxpimage1 = sptoxpbox:Image({
+		texture = "guis/textures/pd2/blackmarket/cash_drop",
+		w = 64,
+		h = 64
+	})
+	
+	local sptoxparrow = sptoxpbox:Image({
+		texture = "guis/textures/pd2/arrow_downcounter",
+		w = 64,
+		h = 64,
+		icon_rotation = 90
+	})
+	
+	local sptoxpimage2 = sptoxpbox:Image({
+		texture = "guis/textures/pd2/blackmarket/xp_drop",
+		w = 64,
+		h = 64
+	})
+	
+	local sptoxpbutton = sptoxpbox:ImageButton({
+		name = "sptoxpbutton",
+		texture = "textures/icons/convert",
+		position = "Right",
+		w = 128,
+		h = 64,
+		on_callback = function ()
+			msim:convert_currencies("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value)
+		end
+	})
+	
+	self.sptoxpslider2 = sptoxpbox:Slider({
+		name = "Experience Points",
+		min = 1,
+		max = managers.money:total(),
+		value = 1,
+		floats = 0,
+		wheel_control = true,
+		on_callback = function ()
+			self.sptoxpslider1:SetValueByPercentage(self.sptoxpslider2.value / self.sptoxpslider2.max, false)
+		end
 	})
 end
 
-MSIMStatisticsPage = MSIMStatisticsPage or class()
+MSIMInformationPage = MSIMInformationPage or class()
 
-function MSIMStatisticsPage:init(parent, navbar, pageholder)
+function MSIMInformationPage:init(parent, navbar, pageholder)
 	self._button = navbar:Button({
-		name = "Statistics",
-		text = "Statistics",
+		name = "Information",
+		text = "Information",
 		border_size = 3,
-		on_callback = ClassClbk(parent, "switch_pages", "stats"),
+		on_callback = ClassClbk(parent, "switch_pages", "info"),
 		font_size = navbar_font_size
 	})
 
 	self._menu = pageholder:Menu({
-		name = "statsholder",
+		name = "infoholder",
 		scrollbar = true,
 		auto_height = true,
 		visible = "false"
@@ -619,5 +852,6 @@ Hooks:PostHook(MissionEndState, 'at_enter', 'msim_getendstate',
 function()
 	msim:load()
 	msim:pick_available_props(3)
+	msim.settings.pp = math.min(msim.settings.pp + msim.settings.pprr, 100)
 	msim:save()
 end)

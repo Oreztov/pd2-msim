@@ -27,7 +27,7 @@ function PropertiesTweakData:init()
 		self.properties.yacht = {
 			texture = "guis/dlcs/bro/textures/pd2/crimenet/yacht",
 			text = "yacht",
-			value = 75,
+			value = 50,
 			min_value = 7000000,
 			feature = "better_exchange_rates",
 			feature_value = 25
@@ -36,7 +36,7 @@ function PropertiesTweakData:init()
 		self.properties.mansion = {
 			texture = "guis/dlcs/bro/textures/pd2/crimenet/mansion",
 			text = "mansion",
-			value = 125,
+			value = 75,
 			min_value = 25000000,
 			feature = "increase_pprr",
 			feature_value = 20
@@ -63,7 +63,7 @@ function PropertiesTweakData:init()
 		self.properties.motel = {
 			texture = "guis/dlcs/bro/textures/pd2/crimenet/hotline_miami_01",
 			text = "motel",
-			value = 50,
+			value = 25,
 			min_value = 1500000,
 			feature = "increase_max_props",
 			feature_value = 4

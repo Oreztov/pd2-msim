@@ -7,8 +7,10 @@
         <group name="textures/icons/">
             <file :name="buy.texture"/>
             <file :name="sell.texture"/>
+			<file :name="convert.texture"/>
             <file :name="plus.texture"/>
             <file :name="msim_logo.texture"/>
+			<file :name="offshore.texture"/>
         </group>
     </assets>
 </mod>
