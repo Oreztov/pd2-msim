@@ -340,12 +340,15 @@ if not msim then
 	end
 
 	function msim:convert_currencies(mode, value1, value2)
-		log("hi")
 		if mode == "oftosp" then
-			log("in")
 			managers.money:_deduct_from_offshore(value1)
 			managers.money:_add_to_total(value2, {no_offshore = true}, "msim")
-			log("wow?")
+		elseif mode == "sptocc" then
+			managers.money:_deduct_from_total(value1)
+			managers.custom_safehouse:add_coins(value2)
+		elseif mode == "sptoxp" then
+			managers.money:_deduct_from_total(value1)
+			managers.experience:add_points(value2)
 		end
 		msim:save()
 		msim:refresh()
@@ -686,7 +689,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoccslider1 = sptoccbox:Slider({
 		name = "Spending Cash",
 		min = 1,
-		max = managers.money:offshore(),
+		max = managers.money:total(),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -728,7 +731,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoccslider2 = sptoccbox:Slider({
 		name = "Continental Coins",
 		min = 1,
-		max = managers.money:total(),
+		max = managers.custom_safehouse:coins(),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -758,7 +761,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoxpslider1 = sptoxpbox:Slider({
 		name = "Spending Cash",
 		min = 1,
-		max = managers.money:offshore(),
+		max = managers.money:total(),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -800,7 +803,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoxpslider2 = sptoxpbox:Slider({
 		name = "Experience Points",
 		min = 1,
-		max = managers.money:total(),
+		max = managers.experience:total(),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
