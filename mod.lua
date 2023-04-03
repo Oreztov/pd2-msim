@@ -4,21 +4,25 @@ if not msim then
 
 	_G.msim = {}
 
+
 	msim.mod_path = ModPath
 	msim.save_path = SavePath
-	msim.settings = {
+	msim.settings = { --initial values
 		pp = 100,
 		pprr = 15,
+		propdiscount = 1,
 		propsownedmax = 3,
-		propsownedcount = 1,
+		propsownedcount = 0,
 		propsowned = {
-			"template"
 		},
 		propsavailablecount = 3,
 		propsavailable = {},
 		keys = {
 			menu = "f8"
-		}
+		},
+		oftsprate = 0.1,
+		sptoccrate = 0.0001,
+		sptoxprate = 0.01,
 	}
 
 	function msim:save(f)
@@ -119,24 +123,25 @@ if not msim then
 
 		self.msim_logo = navbar:Image({
 			name = "msim_logo",
-			offset = {0,0},
-			w = 512,
+			offset = {20,0},
+			w = 400,
 			h = 64,
 			texture = "textures/icons/msim_logo"
 		})
 
 		self.pp_text = navbar:Divider({
 			name = "pp_text",
-			text = "PP: " ..tostring(msim.settings.pp) .."%",
+			help = "Purchasing Power",
+			text = "PP: " ..msim.settings.pp .."%",
 			offset = 20,
 			font_size = navbar_font_size
 		})
 
-		self.plus_button = navbar:ImageButton({
-			name = "plus_button",
-			w = 32,
-			h = 32,
-			texture = "textures/icons/plus"
+		self.pprr_text = navbar:Divider({
+			name = "pprr_text",
+			help = "Purchasing Power Recovery Rate",
+			text = "PPRR: " ..msim.settings.pprr .."%",
+			font_size = navbar_font_size
 		})
 
 	end
@@ -184,14 +189,19 @@ if not msim then
 	end
 
 	function msim:get_actual_value(property)
-		local value = tweak_data.msim.properties[property].value
-		local min_value = tweak_data.msim.properties[property].min_value
-		local money = managers.money:total()
-		
-		local multiplier = math.round(money / 100)
-		local newvalue = value * multiplier
+		log(property)
+		if msim.settings.propsownedcount > 0 then
+			local value = tweak_data.msim.properties[property].value
+			local min_value = tweak_data.msim.properties[property].min_value
+			local money = managers.money:total()
+			
+			local multiplier = math.round(money / 100)
+			local newvalue = value * multiplier
 
-		return math.max(newvalue, min_value)
+			local newvalue = math.max(newvalue, min_value)
+			return newvalue * msim.settings.propdiscount
+		else return 0
+		end
 	end
 
 	function msim:pick_available_props(amount)
@@ -222,6 +232,22 @@ if not msim then
 	end
 
 	function msim:buy_property(property)
+		local prop = tweak_data.msim.properties[property]
+
+		if prop.feature == "increase_max_props" then
+			msim.settings.propsownedmax = msim.settings.propsownedmax + prop.feature_value
+		elseif prop.feature == "increase_oftosp_rate" then
+			msim.settings.oftsprate = msim.settings.oftsprate + prop.feature_value / 100
+		elseif prop.feature == "increase_sptocc_rate" then
+			msim.settings.sptoccrate = msim.settings.sptoccrate + prop.feature_value / 100
+		elseif prop.feature == "increase_sptoxp_rate" then
+			msim.settings.sptoxprate = msim.settings.sptxprate + prop.feature_value / 100
+		elseif prop.feature == "increase_pprr" then
+			msim.settings.pprr = msim.settings.pprr + prop.feature_value
+		elseif prop.feature == "discount_props" then
+			msim.settings.propdiscount = msim.settings.propdiscount - prop.feature_value / 100
+		end
+
 		managers.money:_deduct_from_total(msim:get_actual_value(property), "msim")
 
 		for i, v in ipairs(msim.settings.propsavailable) do
@@ -233,15 +259,37 @@ if not msim then
 
 		table.insert(msim.settings.propsowned, 1, property)
 		table.sort(msim.settings.propsowned)
+
 		msim.settings.propsownedcount = msim.settings.propsownedcount + 1
 		msim.settings.propsavailablecount = msim.settings.propsavailablecount - 1
-		msim.settings.pp = msim.settings.pp - tweak_data.msim.properties[property].value
+		msim.settings.pp = msim.settings.pp - prop.value
 		self:save()
 
 		msim:refresh()
 	end
 
 	function msim:sell_property(property)
+		local prop = tweak_data.msim.properties[property]
+
+		if prop.feature == "increase_max_props" then
+			if (msim.settings.propsownedmax - prop.feature_value) < (msim.settings.propsownedcount - 1) then
+				msim:error_message("Cannot sell property as you have too many others already owned")
+				return
+			else
+				msim.settings.propsownedmax = msim.settings.propsownedmax - prop.feature_value
+			end
+		elseif prop.feature == "increase_oftosp_rate" then
+			msim.settings.oftsprate = msim.settings.oftsprate - prop.feature_value / 100
+		elseif prop.feature == "increase_sptocc_rate" then
+			msim.settings.sptoccrate = msim.settings.sptoccrate - prop.feature_value / 100
+		elseif prop.feature == "increase_sptoxp_rate" then
+			msim.settings.sptoxprate = msim.settings.sptxprate - prop.feature_value / 100
+		elseif prop.feature == "increase_pprr" then
+			msim.settings.pprr = msim.settings.pprr - prop.feature_value
+		elseif prop.feature == "discount_props" then
+			msim.settings.propdiscount = msim.settings.propdiscount + prop.feature_value / 100
+		end
+
 		managers.money:_add_to_total(msim:get_actual_value(property), {no_offshore = true}, "msim")
 
 		for i, v in ipairs(msim.settings.propsowned) do
@@ -273,7 +321,7 @@ if not msim then
 		if mode == "buy" then
 			diag:Show({
 				title = "Confirm Transaction",
-				message = "Are you sure you want to buy " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?\nThis will use " .. tweak_data.msim.properties[property].value .. "% of your Purchasing Power.",
+				message = "Are you sure you want to buy " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?\nThis will use " .. tweak_data.msim.properties[property].value .. "% of your Purchasing Power (PP).",
 				w = self.menu._panel:w() / 2,
 				yes = false,
 				title_merge = {
@@ -286,7 +334,7 @@ if not msim then
 						localized = true,
 						on_callback = function (item)
 							if managers.money:total() < msim:get_actual_value(property) then
-								msim:error_message("Simply a lack of funds")
+								msim:error_message("Not enough money!")
 							elseif msim.settings.propsownedcount == msim.settings.propsownedmax then
 								msim:error_message("You already own the maximum amount of properties!")
 							elseif msim.settings.pp < tweak_data.msim.properties[property].value then
@@ -339,7 +387,125 @@ if not msim then
 		end
 	end
 
-	function msim:convert_currencies(mode, value1, value2)
+	function msim:confirm_convert_transac(mode, value1, value2, ppcost)
+		ppcost = math.ceil(ppcost)
+		value1 = math.floor(value1)
+		value2 = math.floor(value2)
+
+		local diag = MenuDialog:new({
+			accent_color = self.menu_accent_color,
+			highlight_color = self.menu_highlight_color,
+			background_color = self.menu_background_color,
+			text_offset = {self.menu_padding, self.menu_padding / 4},
+			size = self.menu_items_size,
+			items_size = self.menu_items_size,
+			font_size = 25
+		})
+		if value1 > 0 and value2 > 0 then
+			if mode == "oftosp" then
+				diag:Show({
+					title = "Confirm Transaction",
+					message = "Are you sure you want to convert " .. value1 .. " Offshore Funds to " .. value2 .. " Spending Cash?\nThis will use " .. ppcost .. "% of your Purchasing Power (PP).",
+					w = self.menu._panel:w() / 2,
+					yes = false,
+					title_merge = {
+						size = self.menu_title_size
+					},
+					create_items = function (menu)
+						menu:Button({
+							text = "dialog_yes",
+							text_align = "center",
+							localized = true,
+							on_callback = function (item)
+								if msim.settings.pp < ppcost then
+									msim:error_message("You don't have enough Purchasing Power (PP)!")
+								else
+									msim:convert_currencies(mode, value1, value2, ppcost)
+								end
+								diag:hide()
+							end
+						})
+						menu:Button({
+							text = "dialog_no",
+							text_align = "center",
+							localized = true,
+							on_callback = function (item)
+								diag:hide()
+							end
+						})
+					end
+				})
+			elseif mode == "sptocc" then
+				diag:Show({
+					title = "Confirm Transaction",
+					message = "Are you sure you want to convert " .. value1 .. " Spending Cash to " .. value2 .. " Continental Coins?\nThis will use " .. ppcost .. "% of your Purchasing Power (PP).",
+					w = self.menu._panel:w() / 2,
+					yes = false,
+					title_merge = {
+						size = self.menu_title_size
+					},
+					create_items = function (menu)
+						menu:Button({
+							text = "dialog_yes",
+							text_align = "center",
+							localized = true,
+							on_callback = function (item)
+								if msim.settings.pp < ppcost then
+									msim:error_message("You don't have enough Purchasing Power (PP)!")
+								else
+									msim:convert_currencies(mode, value1, value2, ppcost)
+								end
+								diag:hide()
+							end
+						})
+						menu:Button({
+							text = "dialog_no",
+							text_align = "center",
+							localized = true,
+							on_callback = function (item)
+								diag:hide()
+							end
+						})
+					end
+				})
+			elseif mode == "sptoxp" then
+				diag:Show({
+					title = "Confirm Transaction",
+					message = "Are you sure you want to convert " .. value1 .. " Spending Cash to " .. value2 .. " Experience Points?\nThis will use " .. ppcost .. "% of your Purchasing Power (PP).",
+					w = self.menu._panel:w() / 2,
+					yes = false,
+					title_merge = {
+						size = self.menu_title_size
+					},
+					create_items = function (menu)
+						menu:Button({
+							text = "dialog_yes",
+							text_align = "center",
+							localized = true,
+							on_callback = function (item)
+								if msim.settings.pp < ppcost then
+									msim:error_message("You don't have enough Purchasing Power (PP)!")
+								else
+									msim:convert_currencies(mode, value1, value2, ppcost)
+								end
+								diag:hide()
+							end
+						})
+						menu:Button({
+							text = "dialog_no",
+							text_align = "center",
+							localized = true,
+							on_callback = function (item)
+								diag:hide()
+							end
+						})
+					end
+				})
+			end
+		else msim:error_message("Invalid Conversion!") end
+	end
+
+	function msim:convert_currencies(mode, value1, value2, ppcost)
 		if mode == "oftosp" then
 			managers.money:_deduct_from_offshore(value1)
 			managers.money:_add_to_total(value2, {no_offshore = true}, "msim")
@@ -348,8 +514,9 @@ if not msim then
 			managers.custom_safehouse:add_coins(value2)
 		elseif mode == "sptoxp" then
 			managers.money:_deduct_from_total(value1)
-			managers.experience:add_points(value2)
+			managers.experience:add_points(value2, false, true)
 		end
+		msim.settings.pp = msim.settings.pp - ppcost
 		msim:save()
 		msim:refresh()
 	end
@@ -479,10 +646,13 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 
 		local ownedpropfeature = ownedprop:Divider({
 			name = "ownedpropfeature",
-			text = data.feature,
-			text_align = "center",
+			text = data.feature .. "\nby " .. data.feature_value,
+			text_align = "left",
+			size_by_text = true,
+			lines = 3,
 			font_size = 30
 		})
+
 	end
 
 	local availableheader = self._menu:DivGroup({
@@ -566,8 +736,8 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 	
 		local availablepropfeature = availableprop:Divider({
 			name = "availablepropfeature",
-			text = data.feature,
-			text_align = "center",
+			text = data.feature .. "\nby " .. data.feature_value,
+			text_align = "left",
 			font_size = 30
 		})
 	end
@@ -617,7 +787,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.oftospslider1 = oftospbox:Slider({
 		name = "Offshore Funds",
 		min = 1,
-		max = managers.money:offshore(),
+		max = managers.money:offshore() * (msim.settings.pp / 100),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -645,6 +815,15 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		h = 64
 	})
 
+	local oftosprate = oftospbox:Divider({
+		name = "oftosprate",
+		text = " Conversion Rate: ".. msim.settings.oftsprate * 100 .. "%",
+		position = "Left",
+		offset = {10,10},
+		w = 128,
+		h = 64
+	})
+
 	local oftospbutton = oftospbox:ImageButton({
 		name = "oftospbutton",
 		texture = "textures/icons/convert",
@@ -652,14 +831,14 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		w = 128,
 		h = 64,
 		on_callback = function ()
-			msim:convert_currencies("oftosp", self.oftospslider1.value, self.oftospslider2.value)
+			msim:confirm_convert_transac("oftosp", self.oftospslider1.value, self.oftospslider2.value, self.oftospslider1.value / self.oftospslider1.max * 100)
 		end
 	})
 
 	self.oftospslider2 = oftospbox:Slider({
 		name = "Spending Cash",
 		min = 1,
-		max = managers.money:total(),
+		max = self.oftospslider1.max * msim.settings.oftsprate,
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -689,7 +868,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoccslider1 = sptoccbox:Slider({
 		name = "Spending Cash",
 		min = 1,
-		max = managers.money:total(),
+		max = managers.money:total() * (msim.settings.pp / 100),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -716,6 +895,15 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		w = 64,
 		h = 64
 	})
+
+	local sptoccrate = sptoccbox:Divider({
+		name = "sptoccrate",
+		text = " Conversion Rate: ".. msim.settings.sptoccrate * 100 .. "%",
+		position = "Left",
+		offset = {10,10},
+		w = 128,
+		h = 64
+	})
 	
 	local sptoccbutton = sptoccbox:ImageButton({
 		name = "sptoccbutton",
@@ -724,14 +912,14 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		w = 128,
 		h = 64,
 		on_callback = function ()
-			msim:convert_currencies("sptocc", self.sptoccslider1.value, self.sptoccslider2.value)
+			msim:confirm_convert_transac("sptocc", self.sptoccslider1.value, self.sptoccslider2.value, self.sptoccslider1.value / self.sptoccslider1.max * 100)
 		end
 	})
 	
 	self.sptoccslider2 = sptoccbox:Slider({
 		name = "Continental Coins",
 		min = 1,
-		max = managers.custom_safehouse:coins(),
+		max = self.sptoccslider1.max * msim.settings.sptoccrate,
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -761,7 +949,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoxpslider1 = sptoxpbox:Slider({
 		name = "Spending Cash",
 		min = 1,
-		max = managers.money:total(),
+		max = managers.money:total() * (msim.settings.pp / 100),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -788,6 +976,15 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		w = 64,
 		h = 64
 	})
+
+	local sptoxprate = sptoxpbox:Divider({
+		name = "sptoxprate",
+		text = " Conversion Rate: ".. msim.settings.sptoxprate * 100 .. "%",
+		position = "Left",
+		offset = {10,10},
+		w = 128,
+		h = 64
+	})
 	
 	local sptoxpbutton = sptoxpbox:ImageButton({
 		name = "sptoxpbutton",
@@ -796,14 +993,14 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		w = 128,
 		h = 64,
 		on_callback = function ()
-			msim:convert_currencies("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value)
+			msim:confirm_convert_transac("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value, self.sptoxpslider1.value / self.sptoxpslider1.max * 100)
 		end
 	})
 	
 	self.sptoxpslider2 = sptoxpbox:Slider({
 		name = "Experience Points",
 		min = 1,
-		max = managers.experience:total(),
+		max = self.sptoxpslider1.max * msim.settings.sptoxprate,
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -814,6 +1011,23 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 end
 
 MSIMInformationPage = MSIMInformationPage or class()
+
+function MSIMInformationPage:make_stat(parent, name, value)
+	local stattext = parent:DivGroup({
+		name = "stattext",
+		text = name
+	})
+
+	local stattoolbar = stattext:GetToolbar()
+	local statcount = stattoolbar:Divider({
+		name = "statcount",
+		size_by_text = true,
+		text = value,
+		text_align = "right"
+	})
+
+
+end
 
 function MSIMInformationPage:init(parent, navbar, pageholder)
 	self._button = navbar:Button({
@@ -829,6 +1043,50 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		scrollbar = true,
 		auto_height = true,
 		visible = "false"
+	})
+
+	local statsheader = self._menu:DivGroup({
+		name = "statsheader",
+		text = "Statistics",
+		--border_bottom = true,
+		--border_size = 5,
+		font_size = 35,
+		offset = {0, 0},
+		w = 400,
+		background_color = BeardLib.Options:GetValue("MenuColor"):with_alpha(0.1),
+		inherit_values = {
+			background_color = BeardLib.Options:GetValue("MenuColor"):with_alpha(0.1),
+			font_size = 25
+		}
+	})
+
+	MSIMInformationPage:make_stat(statsheader, "Purchasing Power (PP)", msim.settings.pp .. "%")
+	MSIMInformationPage:make_stat(statsheader, "Purchasing Power Recovery Rate (PPRR)", msim.settings.pprr .. "%")
+	MSIMInformationPage:make_stat(statsheader, "Owned Properties", msim.settings.propsownedcount)
+	MSIMInformationPage:make_stat(statsheader, "Maximum Owned Properties", msim.settings.propsownedmax)
+	local totalvalue = 0
+	for index, prop in ipairs(msim.settings.propsowned) do
+		totalvalue = totalvalue + msim:get_actual_value(prop)
+	end
+	MSIMInformationPage:make_stat(statsheader, "Total Property Value", msim:make_money_string(totalvalue))
+	MSIMInformationPage:make_stat(statsheader, "Property Discount", (1 - msim.settings.propdiscount) * 100 .. "%")
+	MSIMInformationPage:make_stat(statsheader, "Offshore Funds to Spending Cash\nConversion Rate", msim.settings.oftsprate * 100 .. "%")
+	MSIMInformationPage:make_stat(statsheader, "Spending Cash to Continental Coins\nConversion Rate", msim.settings.sptoccrate * 100 .. "%")
+	MSIMInformationPage:make_stat(statsheader, "Spending Cash to Experience Points\nConversion Rate", msim.settings.sptoxprate * 100 .. "%")
+
+	local guideheader = self._menu:DivGroup({
+		name = "guideheader",
+		text = "Guide",
+		--border_bottom = true,
+		--border_size = 5,
+		font_size = 35,
+		offset = {0, 0},
+		w = 400,
+		background_color = BeardLib.Options:GetValue("MenuColor"):with_alpha(0.1),
+		inherit_values = {
+			background_color = BeardLib.Options:GetValue("MenuColor"):with_alpha(0.1),
+			font_size = 25
+		}
 	})
 end
 
@@ -847,6 +1105,7 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 		name = "optionsholder",
 		scrollbar = true,
 		auto_height = true,
+		align_method = "grid",
 		visible = "false"
 	})
 end

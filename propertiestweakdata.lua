@@ -11,8 +11,8 @@ function PropertiesTweakData:init()
 			text = "nightclub",
 			value = 15,
 			min_value = 300000,
-			feature = "better_exchange_rates",
-			feature_value = 5
+			feature = "increase_oftosp_rate",
+			feature_value = 10
 		}
 
 		self.properties.jewstore = {
@@ -29,8 +29,8 @@ function PropertiesTweakData:init()
 			text = "yacht",
 			value = 50,
 			min_value = 7000000,
-			feature = "better_exchange_rates",
-			feature_value = 25
+			feature = "increase_sptocc_rate",
+			feature_value = 0.01
 		}
 
 		self.properties.mansion = {
@@ -74,8 +74,8 @@ function PropertiesTweakData:init()
 			text = "template",
 			value = 1,
 			min_value = 7,
-			feature = "N/A",
-			feature_value = 3
+			feature = "increase_sptoxp_rate",
+			feature_value = 1
 		}
 end
 
