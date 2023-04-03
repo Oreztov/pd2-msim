@@ -1,0 +1,9 @@
+<mod name="The Management Simulator (MSIM)" author="Oreztov">
+	<AssetUpdates id="-1" version="1.0" provider="modworkshop" install_directory="mods/" version_is_number="true" />
+	<Localization directory="loc" default="english.yaml">
+		<loc file="english.yaml" language="english" />
+	</Localization>
+	<AddFiles directory="assets" auto_generate="true">
+		
+	</AddFiles>
+</mod>

@@ -1,3 +1,0 @@
-{
-    "msim_menu_main_name": "Management Menu"
-}
