@@ -1,12 +1,12 @@
 blt.forcepcalls(true)
 
 if not msim then
-
 	_G.msim = {}
 
 	msim.mod_path = ModPath
 	msim.save_path = SavePath
-	msim.settings = { --initial values
+	msim.settings = {
+	               --initial values
 		pp = 70,
 		pprr = 30,
 		propdiscount = 1,
@@ -17,14 +17,16 @@ if not msim then
 		propsavailablecount = 3,
 		propsavailable = {},
 		keys = {
-			menu = "f8"
+			menu = "f8",
+			properties = "p",
+			exchange = "e",
+			information = "i",
+			options = "o"
 		},
 		oftsprate = 0.1,
 		sptoccrate = 0.0001,
 		sptoxprate = 0.01,
-		theme = {
-			color = BeardLib.Options:GetValue("MenuColor") or Color.blue
-		}
+		theme = tweak_data.msim.themes["crimenet"]
 	}
 
 	function msim:save(f)
@@ -46,8 +48,9 @@ if not msim then
 		end
 	end
 
-	function msim:check_create_menu()
+	msim:load()
 
+	function msim:check_create_menu()
 		if self.menu then
 			return
 		end
@@ -60,7 +63,7 @@ if not msim then
 		self.menu_title_size = 22
 		self.menu_items_size = 18
 		self.menu_padding = 16
-		msim.settings.theme.color = BeardLib.Options:GetValue("MenuColor") or Color.blue
+		--msim.settings.theme.color = BeardLib.Options:GetValue("MenuColor") or Color.blue
 		self.menu_background_color = Color.black:with_alpha(0.75)
 		self.menu_accent_color = msim.settings.theme.color:with_alpha(0.75)
 		self.menu_highlight_color = self.menu_accent_color:with_alpha(0.075)
@@ -79,6 +82,8 @@ if not msim then
 			localized = true,
 			use_default_close_key = true,
 			disable_player_controls = true,
+			scrollbar = false,
+			auto_height = true,
 			inherit_values = {
 				localized = true
 			}
@@ -97,65 +102,92 @@ if not msim then
 		})
 
 		navbar_font_size = 37
-		local navbar = menu:Holder({
+		local navbar = menu:Group({
 			name = "navbar",
-			align_method = "grid",
+			text = "msim_navbar",
 			border_bottom = true,
-			border_size = 10,
+			border_size = 5,
 			inherit_values = {
 				size_by_text = true,
-				font_size = "35",
-				offset = 20,
 				full_bg_color = self.menu_background_color
+			}
+		})
+
+		local navbar_toolbar = navbar:GetToolbar()
+
+		local back_text = navbar_toolbar:Button({
+			name = "back_text",
+			text = "msim_back",
+			on_callback = function()
+				msim:set_menu_state(false)
+			end
+		})
+
+		local top_bar = navbar:Holder({
+			offset = 0,
+			align_method = "centered_grid",
+			w = menu_w,
+			h = 64
+		})
+
+		local msim_logo = top_bar:Image({
+			name = "msim_logo",
+			w = 400,
+			h = 64,
+			texture = msim.settings.theme.prefix .. "/icons/msim_logo"
+		})
+
+		local bottom_bar = navbar:DivGroup({
+			name = "bottom_bar",
+			text = "",
+			offset = 0,
+			w = menu_w,
+			align_method = "grid",
+			h = 64,
+			inherit_values = {
+				font_size = "30",
+				offset = { 20, 10 }
 			}
 		})
 
 		local pageholder = menu:Holder({
 			name = "pageholder",
-			scrollbar = true,
 			align_method = "centered_grid",
-			offset = {50, 10},
+			auto_height = true,
+			offset = { 50, 10 },
 			inherit_values = {
 				size_by_text = true
 			}
 		})
 
 		self._pages = {
-			props = MSIMPropertyPage:new(self, navbar, pageholder),
-			xchange = MSIMExchangePage:new(self, navbar, pageholder),
-			info = MSIMInformationPage:new(self, navbar, pageholder),
-			options = MSIMOptionsPage:new(self, navbar, pageholder)
+			props = MSIMPropertyPage:new(self, bottom_bar, pageholder),
+			xchange = MSIMExchangePage:new(self, bottom_bar, pageholder),
+			info = MSIMInformationPage:new(self, bottom_bar, pageholder),
+			options = MSIMOptionsPage:new(self, bottom_bar, pageholder)
 		}
 
-		self.msim_logo = navbar:Image({
-			name = "msim_logo",
-			offset = {20,0},
-			w = 400,
-			h = 64,
-			texture = "textures/icons/msim_logo"
-		})
-
-		self.pp_text = navbar:Divider({
+		local pp_text = bottom_bar:Divider({
 			name = "pp_text",
-			text = managers.localization:text("msim_pp_text") .. msim.settings.pp .."%",
-			offset = 20,
+			text = managers.localization:text("msim_pp_text") .. msim.settings.pp .. "%",
 			localized = false,
+			offset = {450, 10},
 			font_size = navbar_font_size
 		})
 
-		self.pprr_text = navbar:Divider({
+
+		local pprr_text = bottom_bar:Divider({
 			name = "pprr_text",
-			text = managers.localization:text("msim_pprr_text") ..msim.settings.pprr .."%",
+			text = managers.localization:text("msim_pprr_text") .. msim.settings.pprr .. "%",
 			localized = false,
 			font_size = navbar_font_size
 		})
-
 	end
 
 	function msim:switch_pages(pagename, item)
 		for name, page in pairs(self._pages) do
 			page._menu:SetVisible(pagename == name)
-			page._button:SetBorder({top = pagename == name})
+			page._button:SetBorder({ top = pagename == name })
 		end
 	end
 
@@ -164,6 +196,15 @@ if not msim then
 		if enabled and not self.menu:Enabled() then
 			self.menu:Enable()
 		elseif not enabled then
+			self.menu:Disable()
+		end
+	end
+
+	function msim:toggle_menu_state()
+		self:check_create_menu()
+		if not self.menu:Enabled() then
+			self.menu:Enable()
+		else
 			self.menu:Disable()
 		end
 	end
@@ -180,7 +221,7 @@ if not msim then
 			accent_color = self.menu_accent_color,
 			highlight_color = self.menu_highlight_color,
 			background_color = self.menu_background_color,
-			text_offset = {self.menu_padding, self.menu_padding / 4},
+			text_offset = { self.menu_padding, self.menu_padding / 4 },
 			size = self.menu_items_size,
 			items_size = self.menu_items_size,
 			font_size = 25,
@@ -192,22 +233,26 @@ if not msim then
 			w = self.menu._panel:w() / 2,
 			title_merge = {
 				size = self.menu_title_size
-			}})
+			}
+		})
+	end
+
+	function msim:change_key_binding(item)
+		msim.settings.keys[item:Name()] = item:Value()
+		BLT.Keybinds:get_keybind("msim_" .. item:Name()):SetKey(item:Value())
+		msim:save()
 	end
 
 	function msim:get_actual_value(property)
-		if msim.settings.propsownedcount > 0 then
-			local value = tweak_data.msim.properties[property].value
-			local min_value = tweak_data.msim.properties[property].min_value
-			local money = managers.money:total()
-			
-			local multiplier = math.round(money / 100)
-			local newvalue = value * multiplier
+		local value = tweak_data.msim.properties[property].value
+		local min_value = tweak_data.msim.properties[property].min_value
+		local money = managers.money:total()
 
-			local newvalue = math.max(newvalue, min_value)
-			return newvalue * msim.settings.propdiscount
-		else return 0
-		end
+		local multiplier = money / 100
+		local newvalue = math.round(value * multiplier)
+
+		local newvalue = math.max(newvalue, min_value)
+		return newvalue * msim.settings.propdiscount
 	end
 
 	function msim:pick_available_props(amount)
@@ -296,7 +341,7 @@ if not msim then
 			msim.settings.propdiscount = msim.settings.propdiscount + prop.feature_value / 100
 		end
 
-		managers.money:_add_to_total(msim:get_actual_value(property), {no_offshore = true}, "msim")
+		managers.money:_add_to_total(msim:get_actual_value(property), { no_offshore = true }, "msim")
 
 		for i, v in ipairs(msim.settings.propsowned) do
 			if v == property then
@@ -319,7 +364,7 @@ if not msim then
 			accent_color = self.menu_accent_color,
 			highlight_color = self.menu_highlight_color,
 			background_color = self.menu_background_color,
-			text_offset = {self.menu_padding, self.menu_padding / 4},
+			text_offset = { self.menu_padding, self.menu_padding / 4 },
 			size = self.menu_items_size,
 			items_size = self.menu_items_size,
 			font_size = 25,
@@ -328,19 +373,21 @@ if not msim then
 		if mode == "buy" then
 			diag:Show({
 				title = managers.localization:text("msim_confirm_transac"),
-				message = string.format(managers.localization:text("msim_confirm_prop_buy"), tweak_data.msim.properties[property].text, msim:make_money_string(msim:get_actual_value(property)), tweak_data.msim.properties[property].value),
+				message = string.format(managers.localization:text("msim_confirm_prop_buy"),
+				managers.localization:text(tweak_data.msim.properties[property].text),
+				msim:make_money_string(msim:get_actual_value(property)), tweak_data.msim.properties[property].value),
 				w = self.menu._panel:w() / 2,
 				localized = false,
 				yes = false,
 				title_merge = {
 					size = self.menu_title_size
 				},
-				create_items = function (menu)
+				create_items = function(menu)
 					menu:Button({
 						text = "msim_dialog_yes",
 						text_align = "center",
 						localized = true,
-						on_callback = function (item)
+						on_callback = function(item)
 							if managers.money:total() < msim:get_actual_value(property) then
 								msim:error_message("msim_error_nomoney")
 							elseif msim.settings.propsownedcount == msim.settings.propsownedmax then
@@ -357,7 +404,7 @@ if not msim then
 						text = "msim_dialog_no",
 						text_align = "center",
 						localized = true,
-						on_callback = function (item)
+						on_callback = function(item)
 							diag:hide()
 						end
 					})
@@ -367,19 +414,21 @@ if not msim then
 			diag:Show({
 				title = managers.localization:text("msim_confirm_transac"),
 				--message = "Are you sure you want to sell " .. tweak_data.msim.properties[property].text .. " for " .. msim:make_money_string(msim:get_actual_value(property)) .. "?",
-				message = string.format(managers.localization:text("msim_confirm_prop_sell"), tweak_data.msim.properties[property].text, msim:make_money_string(msim:get_actual_value(property))),
+				message = string.format(managers.localization:text("msim_confirm_prop_sell"),
+				managers.localization:text(tweak_data.msim.properties[property].text),
+				msim:make_money_string(msim:get_actual_value(property))),
 				w = self.menu._panel:w() / 2,
 				yes = false,
 				localized = false,
 				title_merge = {
 					size = self.menu_title_size
 				},
-				create_items = function (menu)
+				create_items = function(menu)
 					menu:Button({
 						text = "msim_dialog_yes",
 						text_align = "center",
 						localized = true,
-						on_callback = function (item)
+						on_callback = function(item)
 							diag:hide()
 							msim:sell_property(property)
 						end
@@ -388,7 +437,7 @@ if not msim then
 						text = "msim_dialog_no",
 						text_align = "center",
 						localized = true,
-						on_callback = function (item)
+						on_callback = function(item)
 							diag:hide()
 						end
 					})
@@ -406,7 +455,7 @@ if not msim then
 			accent_color = self.menu_accent_color,
 			highlight_color = self.menu_highlight_color,
 			background_color = self.menu_background_color,
-			text_offset = {self.menu_padding, self.menu_padding / 4},
+			text_offset = { self.menu_padding, self.menu_padding / 4 },
 			size = self.menu_items_size,
 			items_size = self.menu_items_size,
 			font_size = 25
@@ -416,19 +465,20 @@ if not msim then
 				diag:Show({
 					title = managers.localization:text("msim_confirm_transac"),
 					--message = "Are you sure you want to convert " .. msim:make_money_string(value1) .. " Offshore Funds to " .. msim:make_money_string(value2) .. " Spending Cash?\nThis will use " .. ppcost .. "% of your Purchasing Power (PP).",
-					message = string.format(managers.localization:text("msim_confirm_oftosp"), msim:make_money_string(value1), msim:make_money_string(value2), ppcost),
+					message = string.format(managers.localization:text("msim_confirm_oftosp"),
+					msim:make_money_string(value1), msim:make_money_string(value2), ppcost),
 					w = self.menu._panel:w() / 2,
 					localized = false,
 					yes = false,
 					title_merge = {
 						size = self.menu_title_size
 					},
-					create_items = function (menu)
+					create_items = function(menu)
 						menu:Button({
 							text = "msim_dialog_yes",
 							text_align = "center",
 							localized = true,
-							on_callback = function (item)
+							on_callback = function(item)
 								if msim.settings.pp < ppcost then
 									msim:error_message("msim_error_nopp")
 								else
@@ -441,7 +491,7 @@ if not msim then
 							text = "msim_dialog_no",
 							text_align = "center",
 							localized = true,
-							on_callback = function (item)
+							on_callback = function(item)
 								diag:hide()
 							end
 						})
@@ -451,18 +501,19 @@ if not msim then
 				diag:Show({
 					title = managers.localization:text("msim_confirm_transac"),
 					localized = false,
-					message = string.format(managers.localization:text("msim_confirm_sptocc"), msim:make_money_string(value1), value2, ppcost),
+					message = string.format(managers.localization:text("msim_confirm_sptocc"),
+					msim:make_money_string(value1), value2, ppcost),
 					w = self.menu._panel:w() / 2,
 					yes = false,
 					title_merge = {
 						size = self.menu_title_size
 					},
-					create_items = function (menu)
+					create_items = function(menu)
 						menu:Button({
 							text = "msim_dialog_yes",
 							text_align = "center",
 							localized = true,
-							on_callback = function (item)
+							on_callback = function(item)
 								if msim.settings.pp < ppcost then
 									msim:error_message("msim_error_nopp")
 								else
@@ -475,7 +526,7 @@ if not msim then
 							text = "msim_dialog_no",
 							text_align = "center",
 							localized = true,
-							on_callback = function (item)
+							on_callback = function(item)
 								diag:hide()
 							end
 						})
@@ -485,18 +536,19 @@ if not msim then
 				diag:Show({
 					title = managers.localization:text("msim_confirm_transac"),
 					localized = false,
-					message = string.format(managers.localization:text("msim_confirm_sptoxp"), msim:make_money_string(value1), value2, ppcost),
+					message = string.format(managers.localization:text("msim_confirm_sptoxp"),
+					msim:make_money_string(value1), value2, ppcost),
 					w = self.menu._panel:w() / 2,
 					yes = false,
 					title_merge = {
 						size = self.menu_title_size
 					},
-					create_items = function (menu)
+					create_items = function(menu)
 						menu:Button({
 							text = "msim_dialog_yes",
 							text_align = "center",
 							localized = true,
-							on_callback = function (item)
+							on_callback = function(item)
 								if msim.settings.pp < ppcost then
 									msim:error_message("msim_error_nopp")
 								else
@@ -509,20 +561,22 @@ if not msim then
 							text = "msim_dialog_no",
 							text_align = "center",
 							localized = true,
-							on_callback = function (item)
+							on_callback = function(item)
 								diag:hide()
 							end
 						})
 					end
 				})
 			end
-		else msim:error_message("msim_error_convert") end
+		else
+			msim:error_message("msim_error_convert")
+		end
 	end
 
 	function msim:convert_currencies(mode, value1, value2, ppcost)
 		if mode == "oftosp" then
 			managers.money:_deduct_from_offshore(value1)
-			managers.money:_add_to_total(value2, {no_offshore = true}, "msim")
+			managers.money:_add_to_total(value2, { no_offshore = true }, "msim")
 		elseif mode == "sptocc" then
 			managers.money:_deduct_from_total(value1)
 			managers.custom_safehouse:add_coins(value2)
@@ -536,8 +590,7 @@ if not msim then
 	end
 
 	Hooks:Add("MenuManagerPostInitialize", "MenuManagerPostInitializemsim", function(menu_manager, nodes)
-
-		MenuCallbackHandler.msim_open_menu = function ()
+		MenuCallbackHandler.msim_open_menu = function()
 			msim:set_menu_state(true)
 		end
 
@@ -555,12 +608,65 @@ if not msim then
 			log("[msim] ERROR: Could not get mod object to register keybinds!")
 			return
 		end
-		BLT.Keybinds:register_keybind(mod, { id = "msim_menu", allow_menu = true, allow_game = true, show_in_menu = false, callback = function()
-			msim:set_menu_state(true)
-		end }):SetKey(msim.settings.keys.menu)
-
+		BLT.Keybinds:register_keybind(mod,
+		{
+			id = "msim_menu",
+			allow_menu = true,
+			allow_game = false,
+			show_in_menu = false,
+			callback = function()
+				msim:toggle_menu_state(true)
+			end
+		}):SetKey(msim.settings.keys.menu)
+		BLT.Keybinds:register_keybind(mod,
+		{
+			id = "msim_properties",
+			allow_menu = true,
+			allow_game = false,
+			show_in_menu = false,
+			callback = function()
+				if msim.menu:Enabled() then
+					msim:switch_pages("props")
+				end
+			end
+		}):SetKey(msim.settings.keys.properties)
+		BLT.Keybinds:register_keybind(mod,
+		{
+			id = "msim_exchange",
+			allow_menu = true,
+			allow_game = false,
+			show_in_menu = false,
+			callback = function()
+				if msim.menu:Enabled() then
+					msim:switch_pages("xchange")
+				end
+			end
+		}):SetKey(msim.settings.keys.exchange)
+		BLT.Keybinds:register_keybind(mod,
+		{
+			id = "msim_information",
+			allow_menu = true,
+			allow_game = false,
+			show_in_menu = false,
+			callback = function()
+				if msim.menu:Enabled() then
+					msim:switch_pages("info")
+				end
+			end
+		}):SetKey(msim.settings.keys.information)
+		BLT.Keybinds:register_keybind(mod,
+		{
+			id = "msim_options",
+			allow_menu = true,
+			allow_game = false,
+			show_in_menu = false,
+			callback = function()
+				if msim.menu:Enabled() then
+					msim:switch_pages("options")
+				end
+			end
+		}):SetKey(msim.settings.keys.options)
 	end)
-
 end
 
 MSIMPropertyPage = MSIMPropertyPage or class()
@@ -588,7 +694,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		border_bottom = true,
 		border_size = 5,
 		font_size = 35,
-		offset = {0, 0},
+		offset = { 0, 0 },
 		inherit_values = {
 			font_size = 35
 		}
@@ -599,23 +705,20 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		name = "ownedcount",
 		size_by_text = true,
 		localized = false,
-		text = tostring(msim.settings.propsownedcount) .. "/" .. tostring(msim.settings.propsownedmax) .. managers.localization:text("msim_owned"),
+		text = tostring(msim.settings.propsownedcount) ..
+		"/" .. tostring(msim.settings.propsownedmax) .. managers.localization:text("msim_owned"),
 		text_align = "right"
 	})
-	
-	for index, prop in ipairs(msim.settings.propsowned) do
 
+	for index, prop in ipairs(msim.settings.propsowned) do
 		data = tweak_data.msim.properties[prop]
 
-			local ownedprop = self._menu:DivGroup({
-			border_bottom = true,
-			border_top = true,
-			border_right = true,
-			border_left = true,
+		local ownedprop = self._menu:DivGroup({
+			border_visible = msim.settings.theme.borders,
 			border_size = 2,
 			align_method = "grid",
 			font_size = 25,
-			offset = {0, 5},
+			offset = { 0, 5 },
 			inherit_values = {
 				size_by_text = true,
 				font_size = 25,
@@ -628,7 +731,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			texture = data.texture,
 			w = 256,
 			h = 128,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			icon_w = 256,
 			icon_h = 128
 		})
@@ -638,7 +741,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			text = data.text,
 			w = 512,
 			h = 128,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			inherit_values = {
 				size_by_text = false,
 				w = 256
@@ -654,7 +757,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 
 		local sellbutton = ownedpropnamevaluegroup:ImageButton({
 			name = "sellbutton",
-			texture = "textures/icons/sell",
+			texture = msim.settings.theme.prefix .. "/icons/sell",
 			w = 64,
 			h = 64,
 			on_callback = ClassClbk(parent, "confirm_prop_transac", prop, "sell")
@@ -670,7 +773,6 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			lines = 3,
 			font_size = 30
 		})
-
 	end
 
 	local availableheader = self._menu:DivGroup({
@@ -680,65 +782,61 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 		border_bottom = true,
 		border_size = 5,
 		font_size = 35,
-		offset = {0, 10},
+		offset = { 0, 10 },
 		inherit_values = {
 			font_size = 35
 		}
 	})
-	
+
 	local availabletoolbar = availableheader:GetToolbar()
 	local availablecount = availabletoolbar:Divider({
 		name = "availablecount",
 		size_by_text = true,
 		localized = false,
-		offset = {0, 0},
+		offset = { 0, 0 },
 		text = tostring(msim.settings.propsavailablecount) .. managers.localization:text("msim_available"),
 		text_align = "right"
 	})
-	
-	
-	for index, prop in ipairs(msim.settings.propsavailable) do
 
+
+	for index, prop in ipairs(msim.settings.propsavailable) do
 		data = tweak_data.msim.properties[prop]
 
-			local availableprop = self._menu:DivGroup({
-			border_bottom = true,
-			border_top = true,
-			border_right = true,
-			border_left = true,
+		local availableprop = self._menu:DivGroup({
+			border_visible = msim.settings.theme.borders,
 			border_size = 2,
 			align_method = "grid",
 			font_size = 25,
-			offset = {0, 5},
+			offset = { 0, 5 },
 			inherit_values = {
 				size_by_text = true,
 				font_size = 25,
 				align_method = "grid",
 			}
 		})
-	
+
 		local availablepropimage = availableprop:Image({
 			name = "availablepropimage",
 			texture = data.texture,
 			w = 256,
 			h = 128,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			icon_w = 256,
 			icon_h = 128
 		})
-	
+
 		local availablepropnamevaluegroup = availableprop:DivGroup({
 			name = "availablepropnamevaluegroup",
 			text = data.text,
 			w = 512,
 			h = 128,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			inherit_values = {
 				size_by_text = false,
 				w = 256
 			}
 		})
-	
+
 		local availablepropvalue = availablepropnamevaluegroup:Divider({
 			name = "availablepropvalue",
 			text = managers.localization:text("msim_value") .. msim:make_money_string(msim:get_actual_value(prop)),
@@ -748,12 +846,12 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 
 		local buybutton = availablepropnamevaluegroup:ImageButton({
 			name = "buybutton",
-			texture = "textures/icons/buy",
+			texture = msim.settings.theme.prefix .. "/icons/buy",
 			w = 64,
 			h = 64,
 			on_callback = ClassClbk(parent, "confirm_prop_transac", prop, "buy")
 		})
-	
+
 		local availablepropfeature = availableprop:Divider({
 			name = "availablepropfeature",
 			localized = false,
@@ -764,7 +862,6 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			font_size = 30
 		})
 	end
-
 end
 
 MSIMExchangePage = MSIMExchangePage or class()
@@ -784,15 +881,12 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		auto_height = true,
 		visible = "false",
 		inherit_values = {
-			offset = {0, 25}
+			offset = { 0, 25 }
 		}
 	})
 
 	local oftospbox = self._menu:DivGroup({
-		border_bottom = true,
-		border_top = true,
-		border_right = true,
-		border_left = true,
+		border_visible = msim.settings.theme.borders,
 		border_size = 2,
 		align_method = "centered_grid",
 		font_size = 25,
@@ -802,7 +896,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		inherit_values = {
 			size_by_text = true,
 			font_size = 30,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			align_method = "centered_grid"
 		}
 	})
@@ -814,13 +908,13 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		value = 1,
 		floats = 0,
 		wheel_control = true,
-		on_callback = function ()
+		on_callback = function()
 			self.oftospslider2:SetValueByPercentage(self.oftospslider1.value / self.oftospslider1.max, false)
 		end
 	})
 
 	local oftospimage1 = oftospbox:Image({
-		texture = "textures/icons/offshore",
+		texture = msim.settings.theme.prefix .. "/icons/offshore",
 		w = 64,
 		h = 64
 	})
@@ -843,19 +937,20 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		localized = false,
 		text = managers.localization:text("msim_convert") .. msim.settings.oftsprate * 100 .. "%",
 		position = "Left",
-		offset = {10,10},
+		offset = { 10, 10 },
 		w = 128,
 		h = 64
 	})
 
 	local oftospbutton = oftospbox:ImageButton({
 		name = "oftospbutton",
-		texture = "textures/icons/convert",
+		texture = msim.settings.theme.prefix .. "/icons/convert",
 		position = "Right",
 		w = 128,
 		h = 64,
-		on_callback = function ()
-			msim:confirm_convert_transac("oftosp", self.oftospslider1.value, self.oftospslider2.value, ((self.oftospslider1.value / self.oftospslider1.max)*100 * msim.settings.pp / 100))
+		on_callback = function()
+			msim:confirm_convert_transac("oftosp", self.oftospslider1.value, self.oftospslider2.value,
+			((self.oftospslider1.value / self.oftospslider1.max) * 100 * msim.settings.pp / 100))
 		end
 	})
 
@@ -866,16 +961,13 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		value = 1,
 		floats = 0,
 		wheel_control = true,
-		on_callback = function ()
+		on_callback = function()
 			self.oftospslider1:SetValueByPercentage(self.oftospslider2.value / self.oftospslider2.max, false)
 		end
 	})
 
 	local sptoccbox = self._menu:DivGroup({
-		border_bottom = true,
-		border_top = true,
-		border_right = true,
-		border_left = true,
+		border_visible = msim.settings.theme.borders,
 		border_size = 2,
 		align_method = "centered_grid",
 		font_size = 25,
@@ -885,11 +977,11 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		inherit_values = {
 			size_by_text = true,
 			font_size = 30,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			align_method = "centered_grid"
 		}
 	})
-	
+
 	self.sptoccslider1 = sptoccbox:Slider({
 		name = "msim_sp",
 		min = 1,
@@ -897,24 +989,24 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		value = 1,
 		floats = 0,
 		wheel_control = true,
-		on_callback = function ()
+		on_callback = function()
 			self.sptoccslider2:SetValueByPercentage(self.sptoccslider1.value / self.sptoccslider1.max, false)
 		end
 	})
-	
+
 	local sptoccimage1 = sptoccbox:Image({
 		texture = "guis/textures/pd2/blackmarket/cash_drop",
 		w = 64,
 		h = 64
 	})
-	
+
 	local sptoccarrow = sptoccbox:Image({
 		texture = "guis/textures/pd2/arrow_downcounter",
 		w = 64,
 		h = 64,
 		icon_rotation = 90
 	})
-	
+
 	local sptoccimage2 = sptoccbox:Image({
 		texture = "guis/dlcs/chill/textures/pd2/safehouse/continental_coins_drop",
 		w = 64,
@@ -926,22 +1018,23 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		localized = false,
 		text = managers.localization:text("msim_convert") .. msim.settings.sptoccrate * 100 .. "%",
 		position = "Left",
-		offset = {10,10},
+		offset = { 10, 10 },
 		w = 128,
 		h = 64
 	})
-	
+
 	local sptoccbutton = sptoccbox:ImageButton({
 		name = "sptoccbutton",
-		texture = "textures/icons/convert",
+		texture = msim.settings.theme.prefix .. "/icons/convert",
 		position = "Right",
 		w = 128,
 		h = 64,
-		on_callback = function ()
-			msim:confirm_convert_transac("sptocc", self.sptoccslider1.value, self.sptoccslider2.value, ((self.sptoccslider1.value / self.sptoccslider1.max)*100 * msim.settings.pp / 100))
+		on_callback = function()
+			msim:confirm_convert_transac("sptocc", self.sptoccslider1.value, self.sptoccslider2.value,
+			((self.sptoccslider1.value / self.sptoccslider1.max) * 100 * msim.settings.pp / 100))
 		end
 	})
-	
+
 	self.sptoccslider2 = sptoccbox:Slider({
 		name = "msim_cc",
 		min = 1,
@@ -949,16 +1042,13 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		value = 1,
 		floats = 0,
 		wheel_control = true,
-		on_callback = function ()
+		on_callback = function()
 			self.sptoccslider1:SetValueByPercentage(self.sptoccslider2.value / self.sptoccslider2.max, false)
 		end
 	})
 
 	local sptoxpbox = self._menu:DivGroup({
-		border_bottom = true,
-		border_top = true,
-		border_right = true,
-		border_left = true,
+		border_visible = msim.settings.theme.borders,
 		border_size = 2,
 		align_method = "centered_grid",
 		font_size = 25,
@@ -968,11 +1058,11 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		inherit_values = {
 			size_by_text = true,
 			font_size = 30,
-			offset = {5, 0},
+			offset = { 5, 0 },
 			align_method = "centered_grid"
 		}
 	})
-	
+
 	self.sptoxpslider1 = sptoxpbox:Slider({
 		name = "msim_sp",
 		min = 1,
@@ -980,24 +1070,24 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		value = 1,
 		floats = 0,
 		wheel_control = true,
-		on_callback = function ()
+		on_callback = function()
 			self.sptoxpslider2:SetValueByPercentage(self.sptoxpslider1.value / self.sptoxpslider1.max, false)
 		end
 	})
-	
+
 	local sptoxpimage1 = sptoxpbox:Image({
 		texture = "guis/textures/pd2/blackmarket/cash_drop",
 		w = 64,
 		h = 64
 	})
-	
+
 	local sptoxparrow = sptoxpbox:Image({
 		texture = "guis/textures/pd2/arrow_downcounter",
 		w = 64,
 		h = 64,
 		icon_rotation = 90
 	})
-	
+
 	local sptoxpimage2 = sptoxpbox:Image({
 		texture = "guis/textures/pd2/blackmarket/xp_drop",
 		w = 64,
@@ -1009,22 +1099,23 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		localized = false,
 		text = managers.localization:text("msim_convert") .. msim.settings.sptoxprate * 100 .. "%",
 		position = "Left",
-		offset = {10,10},
+		offset = { 10, 10 },
 		w = 128,
 		h = 64
 	})
-	
+
 	local sptoxpbutton = sptoxpbox:ImageButton({
 		name = "sptoxpbutton",
-		texture = "textures/icons/convert",
+		texture = msim.settings.theme.prefix .. "/icons/convert",
 		position = "Right",
 		w = 128,
 		h = 64,
-		on_callback = function ()
-			msim:confirm_convert_transac("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value, ((self.sptoxpslider1.value / self.sptoxpslider1.max)*100 * msim.settings.pp / 100))
+		on_callback = function()
+			msim:confirm_convert_transac("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value,
+			((self.sptoxpslider1.value / self.sptoxpslider1.max) * 100 * msim.settings.pp / 100))
 		end
 	})
-	
+
 	self.sptoxpslider2 = sptoxpbox:Slider({
 		name = "msim_xp",
 		min = 1,
@@ -1032,7 +1123,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		value = 1,
 		floats = 0,
 		wheel_control = true,
-		on_callback = function ()
+		on_callback = function()
 			self.sptoxpslider1:SetValueByPercentage(self.sptoxpslider2.value / self.sptoxpslider2.max, false)
 		end
 	})
@@ -1054,8 +1145,6 @@ function MSIMInformationPage:make_stat(parent, name, value)
 		text = value,
 		text_align = "right"
 	})
-
-
 end
 
 function MSIMInformationPage:init(parent, navbar, pageholder)
@@ -1081,10 +1170,11 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 	local statsheader = self._menu:DivGroup({
 		name = "statsheader",
 		text = "msim_stats",
-		--border_bottom = true,
-		--border_size = 5,
+		border_bottom = true,
+		border_position_below_title = true,
+		border_size = 3,
 		font_size = 35,
-		offset = {0, 0},
+		offset = { 0, 0 },
 		w = 400,
 		background_color = msim.settings.theme.color:with_alpha(0.1),
 		inherit_values = {
@@ -1110,10 +1200,11 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 	local guidenb = self._menu:NoteBook({
 		name = "guideheader",
 		text = "msim_guide",
-		--border_bottom = true,
-		--border_size = 5,
+		border_bottom = true,
+		border_size = 3,
+		border_position_below_title = true,
 		font_size = 35,
-		offset = {10, 0},
+		offset = { 10, 0 },
 		w = 750,
 		full_bg_color = msim.settings.theme.color:with_alpha(0.1),
 		inherit_values = {
@@ -1127,22 +1218,22 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		w = 750,
 		size_by_text = false,
 		text = "msim_guide_page1",
-		offset = {0,0}
+		offset = { 0, 0 }
 	})
 	local guidepage2 = guidenb:Divider({
 		name = "guidepage2",
 		text = "msim_guide_page2",
-		offset = {0,0}
+		offset = { 0, 0 }
 	})
 	local guidepage3 = guidenb:Divider({
 		name = "guidepage3",
 		text = "msim_guide_page3",
-		offset = {0,0}
+		offset = { 0, 0 }
 	})
 	local guidepage4 = guidenb:Divider({
 		name = "guidepage4",
 		text = "msim_guide_page4",
-		offset = {0,0}
+		offset = { 0, 0 }
 	})
 	guidenb:AddItemPage(managers.localization:text("msim_introduction"), guidepage1)
 	guidenb:AddItemPage(managers.localization:text("msim_guide_general"), guidepage2)
@@ -1151,6 +1242,75 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 end
 
 MSIMOptionsPage = MSIMOptionsPage or class()
+
+function MSIMOptionsPage:make_theme(parent, theme_name)
+	local theme = tweak_data.msim.themes[theme_name]
+
+	local theme_group = parent:DivGroup({
+		name = "theme_group",
+		text = "msim_theme_" .. theme_name,
+		align_method = "grid",
+		offset = 10
+	})
+
+	local theme_panel = theme_group:DivGroup({
+		offset = 0,
+		max_width = 900,
+		border_visible = theme.borders,
+		border_size = 3,
+		border_color = theme.color,
+		text_size = 40,
+		full_bg_color = theme.color:with_alpha(0.1),
+		align_method = "grid",
+		inherit_values = {
+			offset = 10,
+			text_size = 30
+		}
+	})
+
+	local theme_buy = theme_panel:Image({
+		name = "theme_buy",
+		texture = theme.prefix .. "/icons/buy",
+		w = 64,
+		h = 64
+	})
+
+	local theme_sell = theme_panel:Image({
+		name = "theme_sell",
+		texture = theme.prefix .. "/icons/sell",
+		w = 64,
+		h = 64
+	})
+
+	local theme_convert = theme_panel:Image({
+		name = "theme_convert",
+		texture = theme.prefix .. "/icons/convert",
+		w = 128,
+		h = 64
+	})
+
+	local theme_select = theme_panel:Image({
+		name = "theme_select",
+		texture = theme.prefix .. "/icons/select",
+		w = 128,
+		h = 64
+	})
+
+	local theme_logo = theme_panel:Image({
+		name = "theme_logo",
+		texture = theme.prefix .. "/icons/msim_logo",
+		w = 400,
+		h = 64
+	})
+
+	local theme_button = theme_group:ImageButton({
+		name = "theme_button",
+		texture = msim.settings.theme.prefix .. "/icons/select",
+		offset = 10,
+		w = 128,
+		h = 64
+	})
+end
 
 function MSIMOptionsPage:init(parent, navbar, pageholder)
 	self._button = navbar:Button({
@@ -1166,14 +1326,94 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 		scrollbar = true,
 		auto_height = true,
 		align_method = "grid",
-		visible = "false"
+		visible = "false",
+		inherit_values = {
+			offset = 0
+		}
 	})
+
+	local keybinds = self._menu:DivGroup({
+		text = "msim_keybinds",
+		border_bottom = true,
+		border_size = 3,
+		border_position_below_title = true,
+		text_size = 40,
+		inherit_values = {
+			offset = {10,0},
+			text_size = 30
+		}
+	})
+
+	keybinds:KeyBind({
+		name = "menu",
+		text = "msim_keybind_menu",
+		value = msim.settings.keys.menu,
+		supports_mouse = true,
+		on_callback = function(item)
+			msim:change_key_binding(item)
+		end
+	})
+
+	keybinds:KeyBind({
+		name = "properties",
+		text = "msim_keybind_properties",
+		value = msim.settings.keys.properties,
+		supports_mouse = true,
+		on_callback = function(item)
+			msim:change_key_binding(item)
+		end
+	})
+
+	keybinds:KeyBind({
+		name = "exchange",
+		text = "msim_keybind_exchange",
+		value = msim.settings.keys.exchange,
+		supports_mouse = true,
+		on_callback = function(item)
+			msim:change_key_binding(item)
+		end
+	})
+
+	keybinds:KeyBind({
+		name = "information",
+		text = "msim_keybind_information",
+		value = msim.settings.keys.information,
+		supports_mouse = true,
+		on_callback = function(item)
+			msim:change_key_binding(item)
+		end
+	})
+
+	keybinds:KeyBind({
+		name = "options",
+		text = "msim_keybind_options",
+		value = msim.settings.keys.options,
+		supports_mouse = true,
+		on_callback = function(item)
+			msim:change_key_binding(item)
+		end
+	})
+
+	local themes = self._menu:DivGroup({
+		text = "msim_themes",
+		border_bottom = true,
+		border_size = 3,
+		border_position_below_title = true,
+		text_size = 40,
+		align_method = "grid",
+		inherit_values = {
+			text_size = 30
+		}
+	})
+
+	MSIMOptionsPage:make_theme(themes, "crimenet")
+	MSIMOptionsPage:make_theme(themes, "devtexture")
 end
 
 Hooks:PostHook(MissionEndState, 'at_enter', 'msim_getendstate',
-function()
-	msim:load()
-	msim:pick_available_props(3)
-	msim.settings.pp = math.min(msim.settings.pp + msim.settings.pprr, 100)
-	msim:save()
-end)
+	function()
+		msim:load()
+		msim:pick_available_props(3)
+		msim.settings.pp = math.min(msim.settings.pp + msim.settings.pprr, 100)
+		msim:save()
+	end)

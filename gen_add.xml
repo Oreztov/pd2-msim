@@ -1,10 +1,20 @@
 <table directory="assets">
-	<texture path="textures/icons/buy"/>
-	<texture path="textures/icons/offshore_alt"/>
-	<texture path="textures/icons/plus"/>
-	<texture path="textures/icons/sell"/>
-	<texture path="textures/icons/offshore"/>
-	<texture path="textures/icons/convert"/>
-	<texture path="textures/icons/msim_logo"/>
 	<texture path="textures/properties/template"/>
+	<texture path="textures/themes/devtexture/icons/convert"/>
+	<texture path="textures/themes/devtexture/icons/buy"/>
+	<texture path="textures/themes/crimenet/icons/sell_bad"/>
+	<texture path="textures/themes/devtexture/icons/msim_logo"/>
+	<texture path="textures/themes/devtexture/icons/offshore_alt"/>
+	<texture path="textures/themes/devtexture/icons/offshore"/>
+	<texture path="textures/themes/devtexture/icons/plus"/>
+	<texture path="textures/themes/devtexture/icons/select"/>
+	<texture path="textures/themes/crimenet/icons/sell"/>
+	<texture path="textures/themes/crimenet/icons/select"/>
+	<texture path="textures/themes/crimenet/icons/convert"/>
+	<texture path="textures/themes/crimenet/icons/buy"/>
+	<texture path="textures/themes/crimenet/icons/select_bad"/>
+	<texture path="textures/themes/crimenet/icons/msim_logo"/>
+	<texture path="textures/themes/crimenet/icons/offshore_alt"/>
+	<texture path="textures/themes/crimenet/icons/offshore"/>
+	<texture path="textures/themes/devtexture/icons/sell"/>
 </table>
