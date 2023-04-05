@@ -80,13 +80,15 @@ function PropertiesTweakData:init()
 	self.themes.crimenet = {
 		color = Color.white,
 		borders = false,
-		prefix = "textures/themes/crimenet"
+		prefix = "textures/themes/crimenet",
+		boxgui = true
 	}
 
 	self.themes.devtexture = {
 		color = Color.red,
 		borders = true,
-		prefix = "textures/themes/devtexture"
+		prefix = "textures/themes/devtexture",
+		boxgui = false
 	}
 end
 
