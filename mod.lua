@@ -1,5 +1,3 @@
-blt.forcepcalls(true)
-
 if not msim then
 	_G.msim = {}
 
