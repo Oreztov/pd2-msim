@@ -647,9 +647,6 @@ if not msim then
 			}
 		})
 
-		local main_node = MenuHelperPlus:GetNode("menu_main", "main")
-		local main_item = main_node:item("msimMenu")
-
 		local mod = BLT.Mods:GetMod(msim.mod_path:gsub(".+/(.+)/$", "%1"))
 		if not mod then
 			log("[msim] ERROR: Could not get mod object to register keybinds!")
