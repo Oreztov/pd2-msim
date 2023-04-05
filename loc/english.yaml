@@ -64,6 +64,9 @@ msim_keybind_options: "Switch to Options tab (Only works while in Management Men
 msim_themes: "Visual Themes"
 msim_theme_crimenet: "CRIME.NET"
 msim_theme_devtexture: "Developer Textures"
+msim_adjustments: "Visual Adjustments"
+msim_font_size: "Font/Text Size"
+msim_border_size: "Border/Underline Thickness"
 
 msim_increase_max_props: "Increases maximum amount of properties owned by "
 msim_increase_oftosp_rate: "Improves Offshore Funds to Spending Cash conversion rate by "
