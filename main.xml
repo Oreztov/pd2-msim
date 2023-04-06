@@ -1,5 +1,5 @@
 <mod name="The Management Simulator (MSIM)" author="Oreztov">
-	<AssetUpdates id="-1" version="1.0" provider="modworkshop" install_directory="mods/" version_is_number="true" />
+	<AssetUpdates id="Oreztov/pd2-msim" version="0.0.1" provider="github" install_directory="mods/" dont_delete="true" release="true"/>
 	<Localization directory="loc" default="english.yaml">
 		<loc file="english.yaml" language="english" />
 	</Localization>
