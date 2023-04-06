@@ -1,1 +1,0 @@
-ren *.dds *.texture

@@ -84,8 +84,22 @@ function PropertiesTweakData:init()
 		boxgui = true
 	}
 
+	self.themes.bigbucks = {
+		color = Color(133, 187, 101) / 255,
+		borders = true,
+		prefix = "textures/themes/bigbucks",
+		boxgui = false
+	}
+
+	self.themes.simulator = {
+		color = Color(218, 165, 32) / 255,
+		borders = false,
+		prefix = "textures/themes/simulator",
+		boxgui = false
+	}
+
 	self.themes.devtexture = {
-		color = Color.red,
+		color = Color(0, 122, 243) / 255,
 		borders = true,
 		prefix = "textures/themes/devtexture",
 		boxgui = false

@@ -26,7 +26,8 @@ if not msim then
 		sptoxprate = 0.01,
 		theme_name = "crimenet",
 		font_size = 30,
-		border_size = 5
+		border_size = 5,
+		menu_button_size = 30
 	}
 
 
@@ -150,7 +151,7 @@ if not msim then
 			name = "msim_logo",
 			w = 400,
 			h = 64,
-			texture = msim.theme.prefix .. "/icons/msim_logo"
+			texture = msim.theme.prefix .. "/msim_logo"
 		})
 
 		local bottom_bar = navbar:DivGroup({
@@ -479,6 +480,10 @@ if not msim then
 	end
 
 	function msim:confirm_convert_transac(mode, value1, value2, ppcost)
+		if value1 == 0 or value1 ~= value1 or value2 == 0 or value2 ~= value2 then
+			msim:error_message("msim_error_convert")
+			return
+		end
 		ppcost = math.ceil(ppcost)
 		value1 = math.floor(value1)
 		value2 = math.floor(value2)
@@ -640,10 +645,10 @@ if not msim then
 			callback = "msim_open_menu",
 			position = 8,
 			merge_data = {
-				font_size = 35,
+				font_size = msim.settings.menu_button_size,
 				help_id = "msim_menu_main_help",
 				glow = not io.file_is_readable(msim.save_path) and "guis/textures/pd2/crimenet_marker_glow",
-				row_item_color = msim.theme.color
+				row_item_color = msim.theme.color:with_alpha(1)
 			}
 		})
 
@@ -968,7 +973,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.oftospslider1 = oftospbox:Slider({
 		name = "msim_of",
 		min = 1,
-		max = managers.money:offshore() * (msim.settings.pp / 100),
+		max = managers.money:offshore(),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -978,7 +983,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	})
 
 	local oftospimage1 = oftospbox:Image({
-		texture = msim.theme.prefix .. "/icons/offshore",
+		texture = "textures/icons/offshore",
 		w = 64,
 		h = 64
 	})
@@ -1016,7 +1021,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		--h = 64,
 		on_callback = function()
 			msim:confirm_convert_transac("oftosp", self.oftospslider1.value, self.oftospslider2.value,
-				((self.oftospslider1.value / self.oftospslider1.max) * 100 * msim.settings.pp / 100))
+				((self.oftospslider1.value / self.oftospslider1.max) * 100))
 		end
 	})
 
@@ -1053,7 +1058,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoccslider1 = sptoccbox:Slider({
 		name = "msim_sp",
 		min = 1,
-		max = managers.money:total() * (msim.settings.pp / 100),
+		max = managers.money:total(),
 		value = 1,
 		floats = 0,
 		wheel_control = true,
@@ -1101,7 +1106,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		--h = 64,
 		on_callback = function()
 			msim:confirm_convert_transac("sptocc", self.sptoccslider1.value, self.sptoccslider2.value,
-				((self.sptoccslider1.value / self.sptoccslider1.max) * 100 * msim.settings.pp / 100))
+				((self.sptoccslider1.value / self.sptoccslider1.max) * 100))
 		end
 	})
 
@@ -1141,7 +1146,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	self.sptoxpslider1 = sptoxpbox:Slider({
 		name = "msim_sp",
 		min = 1,
-		max = math.min(managers.money:total() * (msim.settings.pp / 100),
+		max = math.min(managers.money:total(),
 			(max_xp - current_xp) / msim.settings.sptoxprate),
 		value = 1,
 		floats = 0,
@@ -1190,7 +1195,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		--h = 64,
 		on_callback = function()
 			msim:confirm_convert_transac("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value,
-				((self.sptoxpslider1.value / self.sptoxpslider1.max) * 100 * msim.settings.pp / 100))
+				((self.sptoxpslider1.value / self.sptoxpslider1.max) * 100))
 		end
 	})
 
@@ -1209,9 +1214,52 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 	})
 
 	if current_xp == max_xp then
-		self.sptoxpslider1.SetValue(0, false)
-		self.sptoxpslider1.SetValue(0, false)
-		sptoxpbox:SetEnabled(false)
+		self.sptoxpslider1.min = 0
+		self.sptoxpslider1.max = 0
+		self.sptoxpslider2.min = 0
+		self.sptoxpslider2.max = 0
+		self.sptoxpslider1:SetValue(0, false)
+		self.sptoxpslider2:SetValue(0, false)
+		sptoxpbutton:SetText("msim_max_xp")
+		sptoxpbutton:SetCallback(function()
+
+		end)
+	end
+
+	if managers.money:total() <= 0 then
+		self.sptoxpslider1.min = 0
+		self.sptoxpslider1.max = 0
+		self.sptoxpslider2.min = 0
+		self.sptoxpslider2.max = 0
+		self.sptoxpslider1:SetValue(0, false)
+		self.sptoxpslider2:SetValue(0, false)
+		sptoxpbutton:SetText("msim_no_sp")
+		sptoxpbutton:SetCallback(function()
+
+		end)
+		self.sptocslider1.min = 0
+		self.sptocslider1.max = 0
+		self.sptocslider2.min = 0
+		self.sptocslider2.max = 0
+		self.sptocslider1:SetValue(0, false)
+		self.sptocslider2:SetValue(0, false)
+		sptoccbutton:SetText("msim_no_sp")
+		sptoccbutton:SetCallback(function()
+
+		end)
+	end
+
+	if managers.money:offshore() <= 0 then
+		self.oftospslider1.min = 0
+		self.oftospslider1.max = 0
+		self.oftospslider2.min = 0
+		self.oftospslider2.max = 0
+		self.oftospslider1:SetValue(0, false)
+		self.oftospslider2:SetValue(0, false)
+		oftospbutton:SetText("msim_no_of")
+		oftospbutton:SetCallback(function()
+
+		end)
 	end
 end
 
@@ -1356,6 +1404,14 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		text = "msim_tip2",
 	})
 	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 2", tip2)
+	local tip3 = tipsnb:Divider({
+		text = "msim_tip3",
+	})
+	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 3", tip3)
+	local tip4 = tipsnb:Divider({
+		text = "msim_tip4",
+	})
+	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 4", tip4)
 end
 
 MSIMOptionsPage = MSIMOptionsPage or class()
@@ -1387,7 +1443,7 @@ function MSIMOptionsPage:make_theme(parent, theme_name)
 		offset = 0,
 		border_visible = theme.borders,
 		border_size = msim.settings.border_size - 2,
-		border_color = theme.color,
+		border_color = theme.color:with_alpha(1),
 		font_size = msim.settings.font_size,
 		full_bg_color = theme.color:with_alpha(0.1),
 		align_method = "grid",
@@ -1399,7 +1455,7 @@ function MSIMOptionsPage:make_theme(parent, theme_name)
 
 	local theme_logo = theme_panel:Image({
 		name = "theme_logo",
-		texture = theme.prefix .. "/icons/msim_logo",
+		texture = theme.prefix .. "/msim_logo",
 		w = 400,
 		h = 64
 	})
@@ -1523,6 +1579,8 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 	})
 
 	MSIMOptionsPage:make_theme(themes, "crimenet")
+	MSIMOptionsPage:make_theme(themes, "bigbucks")
+	MSIMOptionsPage:make_theme(themes, "simulator")
 	MSIMOptionsPage:make_theme(themes, "devtexture")
 
 	local adjustments = self._menu:DivGroup({
@@ -1562,6 +1620,19 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 			msim.settings.border_size = self.border_size_slider.value
 			msim:save()
 			msim:refresh()
+		end
+	})
+
+	self.menu_button_size_slider = adjustments:Slider({
+		text = "msim_menu_button_size",
+		value = msim.settings.menu_button_size,
+		max = 40,
+		min = 20,
+		step = 1,
+		floats = 0,
+		on_callback = function()
+			msim.settings.menu_button_size = self.menu_button_size_slider.value
+			msim:save()
 		end
 	})
 end
