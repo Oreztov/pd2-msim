@@ -110,7 +110,7 @@ if not msim then
 		self._menu_w_left = menu_w / 3.5 - self.menu_padding
 		self._menu_w_right = menu_w - self._menu_w_left - self.menu_padding * 2
 
-		local menu = self.menu:Menu({
+		local menu = self.menu:Holder({
 			background_color = self.menu_background_color,
 			h = self.menu.h,
 			auto_height = false
@@ -167,10 +167,12 @@ if not msim then
 			}
 		})
 
-		local pageholder = menu:Holder({
+		local pageholder = menu:Menu({
 			name = "pageholder",
 			align_method = "centered_grid",
-			auto_height = true,
+			auto_height = false,
+			h = menu_h - navbar:H() - 65,
+			scrollbar = true,
 			offset = { 50, 10 },
 			inherit_values = {
 				size_by_text = true
@@ -365,7 +367,7 @@ if not msim then
 
 		if prop.feature == "msim_increase_max_props" then
 			if (msim.settings.propsownedmax - prop.feature_value) < (msim.settings.propsownedcount - 1) then
-				msim:error_message(msim_error_toomanyprops)
+				msim:error_message("msim_error_toomanyprops")
 				return
 			else
 				msim.settings.propsownedmax = msim.settings.propsownedmax - prop.feature_value
@@ -380,6 +382,13 @@ if not msim then
 			msim.settings.pprr = msim.settings.pprr - prop.feature_value
 		elseif prop.feature == "msim_discount_props" then
 			msim.settings.propdiscount = msim.settings.propdiscount + prop.feature_value / 100
+		end
+
+		for i, v in ipairs(msim.settings.propsowned) do
+			if v == property then
+				table.remove(msim.settings.propsowned, i)
+				break
+			end
 		end
 
 		managers.money:_add_to_total(msim:get_actual_value(property), { no_offshore = true }, "msim")
@@ -1421,6 +1430,10 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		text = "msim_tip6",
 	})
 	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 6", tip6)
+	local tip7 = tipsnb:Divider({
+		text = "msim_tip7",
+	})
+	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 7", tip7)
 end
 
 MSIMOptionsPage = MSIMOptionsPage or class()
