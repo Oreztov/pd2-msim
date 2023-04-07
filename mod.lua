@@ -242,6 +242,7 @@ if not msim then
 			self:check_create_menu()
 			self.menu:Enable()
 			msim.enabled = true
+			msim:switch_pages(msim.page)
 		else
 			self.menu:Disable()
 			msim.enabled = false
@@ -278,8 +279,8 @@ if not msim then
 	end
 
 	function msim:change_key_binding(item)
-		msim.settings.keys[item:Name()] = item:Value()
-		BLT.Keybinds:get_keybind("msim_" .. item:Name()):SetKey(item:Value())
+		msim.settings.keys[item.name] = item.value
+		BLT.Keybinds:get_keybind("msim_" .. item.name):SetKey(item.value)
 		msim:save()
 	end
 
@@ -1412,6 +1413,14 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		text = "msim_tip4",
 	})
 	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 4", tip4)
+	local tip5 = tipsnb:Divider({
+		text = "msim_tip5",
+	})
+	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 5", tip5)
+	local tip6 = tipsnb:Divider({
+		text = "msim_tip6",
+	})
+	tipsnb:AddItemPage(managers.localization:text("msim_tip") .. " 6", tip6)
 end
 
 MSIMOptionsPage = MSIMOptionsPage or class()
@@ -1478,8 +1487,6 @@ function MSIMOptionsPage:make_theme(parent, theme_name)
 	end
 
 	table.insert(msim.buttons, theme_select)
-
-	--theme_button:SetPosition(theme_group:W() - theme_button:W() - 25, theme_button:Y())
 end
 
 function MSIMOptionsPage:init(parent, navbar, pageholder)
@@ -1515,6 +1522,37 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 			font_size = msim.settings.font_size - 10
 		}
 	})
+
+	local keybindstb = keybinds:GetToolbar()
+	local keybinds_default = keybindstb:Button({
+		text = "msim_default",
+		font_size = msim.settings.font_size,
+		on_callback = function()
+			msim:change_key_binding({
+				name = "menu",
+				value = "f8"
+			})
+			msim:change_key_binding({
+				name = "properties",
+				value = "p"
+			})
+			msim:change_key_binding({
+				name = "exchange",
+				value = "e"
+			})
+			msim:change_key_binding({
+				name = "information",
+				value = "i"
+			})
+			msim:change_key_binding({
+				name = "options",
+				value = "o"
+			})
+			msim:refresh()
+		end
+	})
+
+	table.insert(msim.buttons, keybinds_default)
 
 	keybinds:KeyBind({
 		name = "menu",
@@ -1594,6 +1632,21 @@ function MSIMOptionsPage:init(parent, navbar, pageholder)
 			font_size = msim.settings.font_size - 10
 		}
 	})
+
+	local adjustmentstb = adjustments:GetToolbar()
+	local adjustments_default = adjustmentstb:Button({
+		text = "msim_default",
+		font_size = msim.settings.font_size,
+		on_callback = function()
+			msim.settings.font_size = 30
+			msim.settings.border_size = 5
+			msim.settings.menu_button_size = 30
+			msim:save()
+			msim:refresh()
+		end
+	})
+
+	table.insert(msim.buttons, adjustments_default)
 
 	self.font_size_slider = adjustments:Slider({
 		text = "msim_font_size",
