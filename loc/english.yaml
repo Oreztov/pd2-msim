@@ -87,7 +87,7 @@ msim_font_size: "Font/Text Size"
 msim_border_size: "Border/Underline Thickness"
 msim_menu_button_size: "Main Menu Button Size (Requires Restart!)"
 
-msim_increase_max_props: "Increases maximum amount of properties owned by "
+msim_increase_max_props: "Increases maximum amount of properties owned by $value;"
 msim_increase_oftosp_rate: "Improves Offshore Funds to Spending Cash conversion rate by $value;%"
 msim_increase_sptocc_rate: "Improves Spending Cash to Continental Coins conversion rate by $value;%"
 msim_increase_sptoxp_rate: "Improves Spending Cash to Experience Points conversion rate by $value;%"

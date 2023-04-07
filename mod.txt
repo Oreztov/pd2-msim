@@ -1,6 +1,6 @@
 {
-	"name" : "msim",
-	"description" : "Payday 2 - The Management Simulator",
+	"name" : "The Management Simulator",
+	"description" : "Payday 2 - The Management Simulator (MSIM)",
 	"author" : "Oreztov",
 	"contact" : "Oreztov#2411",
 	"color" : "0.043 0.808 0.6",
