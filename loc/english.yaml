@@ -1,8 +1,7 @@
 msim_menu_main_name: "Management Menu"
 msim_menu_main_help: "Opens the Management Simulator (MSIM) menu."
 
-msim_navbar: "Navigation Bar",
-msim_back: "BACK [ESC]"
+msim_close: "CLOSE [ESC]"
 msim_pp_text: "PP: "
 msim_pprr_text: "PPRR: "
 msim_dialog_yes: "Yes"

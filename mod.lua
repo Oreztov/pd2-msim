@@ -117,9 +117,9 @@ if not msim then
 		})
 
 		navbar_font_size = msim.settings.font_size
-		local navbar = menu:Group({
+		local navbar = menu:DivGroup({
 			name = "navbar",
-			text = "msim_navbar",
+			text = "msim_menu_main_name",
 			border_bottom = true,
 			border_size = msim.settings.border_size,
 			inherit_values = {
@@ -130,15 +130,15 @@ if not msim then
 
 		local navbar_toolbar = navbar:GetToolbar()
 
-		local back_text = navbar_toolbar:Button({
-			name = "back_text",
-			text = "msim_back",
+		local close_text = navbar_toolbar:Button({
+			name = "close_text",
+			text = "msim_close",
 			on_callback = function()
 				msim:set_menu_state(false)
 			end
 		})
 
-		table.insert(msim.buttons, back_text)
+		table.insert(msim.buttons, close_text)
 
 		local top_bar = navbar:Holder({
 			offset = 0,
@@ -244,7 +244,9 @@ if not msim then
 			self:check_create_menu()
 			self.menu:Enable()
 			msim.enabled = true
-			msim:switch_pages(msim.page)
+			if msim.page ~= "properties" then
+				msim:switch_pages(msim.page)
+			end
 		else
 			self.menu:Disable()
 			msim.enabled = false
@@ -828,9 +830,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			name = "sellbutton",
 			text = "msim_sell",
 			font_size = msim.settings.font_size,
-			--texture = msim.theme.prefix .. "/icons/sell",
-			--w = 64,
-			--h = 64,
+			size_by_text = true,
 			on_callback = ClassClbk(parent, "confirm_prop_transac", prop, "sell")
 		})
 
@@ -921,9 +921,7 @@ function MSIMPropertyPage:init(parent, navbar, pageholder)
 			name = "buybutton",
 			text = "msim_buy",
 			font_size = msim.settings.font_size,
-			--texture = msim.theme.prefix .. "/icons/buy",
-			--w = 64,
-			--h = 64,
+			size_by_text = true,
 			on_callback = ClassClbk(parent, "confirm_prop_transac", prop, "buy")
 		})
 
@@ -1023,12 +1021,9 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 
 	local oftospbutton = oftospbox:Button({
 		name = "oftospbutton",
-		--texture = msim.theme.prefix .. "/icons/convert",
 		position = "Right",
 		text = "msim_convert",
 		font_size = msim.settings.font_size,
-		--w = 128,
-		--h = 64,
 		on_callback = function()
 			msim:confirm_convert_transac("oftosp", self.oftospslider1.value, self.oftospslider2.value,
 				((self.oftospslider1.value / self.oftospslider1.max) * 100))
@@ -1110,10 +1105,7 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		name = "sptoccbutton",
 		text = "msim_convert",
 		font_size = msim.settings.font_size,
-		--texture = msim.theme.prefix .. "/icons/convert",
 		position = "Right",
-		--w = 128,
-		--h = 64,
 		on_callback = function()
 			msim:confirm_convert_transac("sptocc", self.sptoccslider1.value, self.sptoccslider2.value,
 				((self.sptoccslider1.value / self.sptoccslider1.max) * 100))
@@ -1197,12 +1189,9 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 
 	local sptoxpbutton = sptoxpbox:Button({
 		name = "sptoxpbutton",
-		--texture = msim.theme.prefix .. "/icons/convert",
 		text = "msim_convert",
 		font_size = msim.settings.font_size,
 		position = "Right",
-		--w = 128,
-		--h = 64,
 		on_callback = function()
 			msim:confirm_convert_transac("sptoxp", self.sptoxpslider1.value, self.sptoxpslider2.value,
 				((self.sptoxpslider1.value / self.sptoxpslider1.max) * 100))
@@ -1280,6 +1269,7 @@ function MSIMInformationPage:make_stat(parent, name, value)
 		name = "stattext",
 		text = managers.localization:text(name),
 		localized = false,
+		full_bg_color = Color.black:with_alpha(0),
 		size_by_text = false
 	})
 
@@ -1308,10 +1298,7 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		scrollbar = true,
 		auto_height = true,
 		visible = "false",
-		align_method = "grid",
-		inherit_values = {
-			--align_method = "grid"
-		}
+		align_method = "grid"
 	})
 
 	local statsheader = self._menu:DivGroup({
@@ -1323,9 +1310,8 @@ function MSIMInformationPage:init(parent, navbar, pageholder)
 		font_size = msim.settings.font_size,
 		offset = { 0, 0 },
 		w = 400,
-		background_color = msim.theme.color:with_alpha(0.1),
+		full_bg_color = msim.theme.color:with_alpha(0.1),
 		inherit_values = {
-			background_color = msim.theme.color:with_alpha(0.1),
 			font_size = msim.settings.font_size - 5
 		}
 	})
