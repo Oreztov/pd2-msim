@@ -74,35 +74,154 @@ function PropertiesTweakData:init()
 		feature = "msim_increase_max_props",
 		feature_value = 4
 	}
+	
+	self.properties.scrapyard = {
+		texture = "textures/properties/",
+		text = "msim_scrapyard",
+		value = 15,
+		min_value = 500000,
+		feature = "msim_increase_max_props",
+		feature_value = 3
+	}
+	
+	self.properties.cliffmansion = {
+		texture = "textures/properties/",
+		text = "msim_cliffmansion",
+		value = 60,
+		min_value = 20000000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.gallery = {
+		texture = "textures/properties/",
+		text = "msim_gallery",
+		value = 10,
+		min_value = 250000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.penthouse = {
+		texture = "textures/properties/",
+		text = "msim_penthouse",
+		value = 40,
+		min_value = 7500000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.airport = {
+		texture = "textures/properties/",
+		text = "msim_airport",
+		value = 70,
+		min_value = 20000000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.nycapartment = {
+		texture = "textures/properties/",
+		text = "msim_nycapartment",
+		value = 10,
+		min_value = 400000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.slaughterhouse = {
+		texture = "textures/properties/",
+		text = "msim_slaughterhouse",
+		value = 35,
+		min_value = 2250000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.pallets = {
+		texture = "textures/properties/",
+		text = "msim_pallets",
+		value = 30,
+		min_value = 1750000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.diner = {
+		texture = "textures/properties/",
+		text = "msim_diner",
+		value = 5,
+		min_value = 100000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.common = {
+		texture = "textures/properties/",
+		text = "msim_common",
+		value = 10,
+		min_value = 350000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.dinoil = {
+		texture = "textures/properties/",
+		text = "msim_dinoil",
+		value = 10,
+		min_value = 450000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.clubhouse = {
+		texture = "textures/properties/",
+		text = "msim_clubhouse",
+		value = 30,
+		min_value = 1250000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.ranch = {
+		texture = "textures/properties/",
+		text = "msim_ranch",
+		value = 45,
+		min_value = 5750000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.teashop = {
+		texture = "textures/properties/",
+		text = "msim_teashop",
+		value = 25,
+		min_value = 1050000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
+	
+	self.properties.carshop = {
+		texture = "textures/properties/",
+		text = "msim_carshop",
+		value = 40,
+		min_value = 4475000,
+		feature = "msim_increase_pprr",
+		feature_value = 15
+	}
 
 	self.themes = {}
 
 	self.themes.crimenet = {
 		color = Color.white,
 		borders = false,
-		prefix = "textures/themes/crimenet",
-		boxgui = true
-	}
-
-	self.themes.bigbucks = {
-		color = Color(133, 187, 101) / 255,
-		borders = true,
-		prefix = "textures/themes/bigbucks",
-		boxgui = false
-	}
-
-	self.themes.simulator = {
-		color = Color(218, 165, 32) / 255,
-		borders = false,
-		prefix = "textures/themes/simulator",
-		boxgui = false
+		prefix = "textures/themes/crimenet"
 	}
 
 	self.themes.devtexture = {
-		color = Color(0, 122, 243) / 255,
+		color = Color.red,
 		borders = true,
-		prefix = "textures/themes/devtexture",
-		boxgui = false
+		prefix = "textures/themes/devtexture"
 	}
 end
 
