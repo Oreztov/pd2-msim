@@ -37,3 +37,4 @@ Make sure to balance the values, and to have a wide range of features.
 # Credits
 * Made by Oreztov
 * With help from Xeletron and Hoppip
+* Additional properties by TimeForSteve
