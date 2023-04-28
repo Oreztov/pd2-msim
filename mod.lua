@@ -7,6 +7,7 @@ if not msim then
 		--initial values
 		pp = 70,
 		pprr = 30,
+
 		propdiscount = 1,
 		propsownedmax = 3,
 		propsownedcount = 0,
@@ -21,17 +22,18 @@ if not msim then
 			information = "i",
 			options = "o"
 		},
+
 		oftsprate = 0.1,
 		sptoccrate = 0.0001,
 		sptoxprate = 0.01,
+
 		theme_name = "crimenet",
 		font_size = 30,
 		border_size = 5,
-		menu_button_size = 30
+		menu_button_size = 30,
+
+		msim_version = "1.0"
 	}
-
-
-
 
 	function msim:save()
 		io.save_as_json(msim.settings, msim.save_path)

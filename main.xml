@@ -1,5 +1,5 @@
 <mod name="The Management Simulator (MSIM)" author="Oreztov">
-	<AssetUpdates id="-1" version="1.0" provider="modworkshop" install_directory="mods/" dont_delete="true" version_is_number="true"/>
+	<AssetUpdates id="42084" version="1.0" provider="modworkshop" install_directory="mods/" dont_delete="true" version_is_number="true"/>
 	<Localization directory="loc" default="english.yaml">
 		<loc file="english.yaml" language="english" />
 	</Localization>
