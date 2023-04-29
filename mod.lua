@@ -697,6 +697,7 @@ if not msim then
 			callback = "msim_open_menu",
 			position = 8,
 			merge_data = {
+				font = "fonts/font_large_mf",
 				font_size = msim.settings.menu_button_size,
 				help_id = "msim_menu_main_help",
 				glow = not io.file_is_readable(msim.save_path) and "guis/textures/pd2/crimenet_marker_glow",
