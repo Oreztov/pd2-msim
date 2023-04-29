@@ -5,7 +5,7 @@ if not msim then
 	msim.save_path = SavePath .. "msim_settings.txt"
 	msim.settings = {
 		--initial values
-		pp = 70,
+		pp = 100,
 		pprr = 30,
 
 		propdiscount = 1,
@@ -35,13 +35,48 @@ if not msim then
 		msim_version = "1.0"
 	}
 
+	local keys_to_encrypt = {
+		pp = true,
+		pprr = true,
+		propdiscount = true,
+		propsownedmax = true,
+		propsownedcount = true,
+		propsavailablecount = true,
+		oftsprate = true,
+		sptoccrate = true,
+		sptoxprate = true,
+		msim_version = true
+	}
+
 	function msim:save()
-		io.save_as_json(msim.settings, msim.save_path)
+		local data = {}
+		-- encode
+		for k, v in pairs(msim.settings) do
+			if keys_to_encrypt[k] then
+				local encrypted = Application:digest_value(v, true)
+				local encrypted_array = { encrypted:byte(1, encrypted:len()) }
+				data[k] = encrypted_array
+			else
+				data[k] = v
+			end
+		end
+		io.save_as_json(data, msim.save_path)
 	end
 
 	function msim:load()
 		if io.file_is_readable(msim.save_path) then
-			local data = io.load_as_json(msim.save_path)
+			local load = io.load_as_json(msim.save_path)
+			local data = {}
+			-- decode
+			for k, v in pairs(load) do
+				if keys_to_encrypt[k] then
+					local encrypted = string.char(unpack(v))
+					local decrypted = Application:digest_value(encrypted, false)
+					data[k] = decrypted
+				else
+					data[k] = v
+				end
+			end
 			if data then
 				local function merge(tbl1, tbl2)
 					for k, v in pairs(tbl2) do
@@ -65,6 +100,8 @@ if not msim then
 	msim.page = "properties"
 	msim.enabled = false
 	msim.buttons = {}
+
+	msim.pp_multi = 2
 
 	function msim:check_create_menu()
 		if self.menu then
@@ -360,7 +397,7 @@ if not msim then
 
 		msim.settings.propsownedcount = msim.settings.propsownedcount + 1
 		msim.settings.propsavailablecount = msim.settings.propsavailablecount - 1
-		msim.settings.pp = msim.settings.pp - prop.value
+		msim.settings.pp = msim.settings.pp - prop.value * msim.pp_multi
 		self:save()
 
 		msim:refresh()
@@ -422,7 +459,8 @@ if not msim then
 				title = managers.localization:text("msim_confirm_transac"),
 				message = string.format(managers.localization:text("msim_confirm_prop_buy"),
 					managers.localization:text(tweak_data.msim.properties[property].text),
-					msim:make_money_string(msim:get_actual_value(property)), tweak_data.msim.properties[property].value),
+					msim:make_money_string(msim:get_actual_value(property)),
+					tweak_data.msim.properties[property].value * msim.pp_multi),
 				w = self.menu._panel:w() / 2,
 				localized = false,
 				yes = false,
