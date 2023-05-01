@@ -16,7 +16,7 @@ function PropertiesTweakData:init()
 	self.properties.nightclub = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/nightclub",
 		text = "msim_nightclub",
-		value = 15,
+		value = 20,
 		min_value = 300000,
 		feature = "msim_increase_oftosp_rate",
 		feature_value = 10
@@ -25,7 +25,7 @@ function PropertiesTweakData:init()
 	self.properties.jewstore = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/jewelrystore",
 		text = "msim_jewstore",
-		value = 10,
+		value = 15,
 		min_value = 500000,
 		feature = "msim_increase_oftosp_rate",
 		feature_value = 5
@@ -34,7 +34,7 @@ function PropertiesTweakData:init()
 	self.properties.yacht = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/yacht",
 		text = "msim_yacht",
-		value = 20,
+		value = 25,
 		min_value = 7000000,
 		feature = "msim_increase_oftosp_rate",
 		feature_value = 20
@@ -43,7 +43,7 @@ function PropertiesTweakData:init()
 	self.properties.mansion = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/mansion",
 		text = "msim_mansion",
-		value = 25,
+		value = 30,
 		min_value = 25000000,
 		feature = "msim_increase_oftosp_rate",
 		feature_value = 25
@@ -52,7 +52,7 @@ function PropertiesTweakData:init()
 	self.properties.laundromat = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/safehouse_old",
 		text = "msim_laundromat",
-		value = 7,
+		value = 10,
 		min_value = 150000,
 		feature = "msim_increase_sptocc_rate",
 		feature_value = 0.02
@@ -61,7 +61,7 @@ function PropertiesTweakData:init()
 	self.properties.barn = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/goatsim_02",
 		text = "msim_barn",
-		value = 10,
+		value = 15,
 		min_value = 75000,
 		feature = "msim_increase_sptocc_rate",
 		feature_value = 0.03
@@ -70,7 +70,7 @@ function PropertiesTweakData:init()
 	self.properties.motel = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/hotline_miami_01",
 		text = "msim_motel",
-		value = 15,
+		value = 20,
 		min_value = 1500000,
 		feature = "msim_increase_sptocc_rate",
 		feature_value = 0.05
@@ -79,7 +79,7 @@ function PropertiesTweakData:init()
 	self.properties.scrapyard = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/bigoil_01",
 		text = "msim_scrapyard",
-		value = 5,
+		value = 10,
 		min_value = 500000,
 		feature = "msim_increase_sptocc_rate",
 		feature_value = 0.01
@@ -88,7 +88,7 @@ function PropertiesTweakData:init()
 	self.properties.cliffmansion = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/bigoil_02",
 		text = "msim_cliffmansion",
-		value = 30,
+		value = 35,
 		min_value = 20000000,
 		feature = "msim_increase_sptoxp_rate",
 		feature_value = 5
@@ -97,7 +97,7 @@ function PropertiesTweakData:init()
 	self.properties.gallery = {
 		texture = "textures/properties/msim_gallery",
 		text = "msim_gallery",
-		value = 10,
+		value = 15,
 		min_value = 250000,
 		feature = "msim_increase_sptoxp_rate",
 		feature_value = 1
@@ -106,7 +106,7 @@ function PropertiesTweakData:init()
 	self.properties.penthouse = {
 		texture = "textures/properties/msim_penthouse",
 		text = "msim_penthouse",
-		value = 20,
+		value = 25,
 		min_value = 7500000,
 		feature = "msim_increase_sptoxp_rate",
 		feature_value = 3
@@ -124,7 +124,7 @@ function PropertiesTweakData:init()
 	self.properties.nycapartment = {
 		texture = "textures/properties/msim_nycapartment",
 		text = "msim_nycapartment",
-		value = 5,
+		value = 10,
 		min_value = 400000,
 		feature = "msim_discount_props",
 		feature_value = 3
@@ -133,7 +133,7 @@ function PropertiesTweakData:init()
 	self.properties.slaughterhouse = {
 		texture = "textures/properties/msim_slaughterhouse",
 		text = "msim_slaughterhouse",
-		value = 15,
+		value = 20,
 		min_value = 2250000,
 		feature = "msim_discount_props",
 		feature_value = 10
@@ -142,7 +142,7 @@ function PropertiesTweakData:init()
 	self.properties.pallets = {
 		texture = "textures/properties/msim_pallets",
 		text = "msim_pallets",
-		value = 10,
+		value = 15,
 		min_value = 1750000,
 		feature = "msim_discount_props",
 		feature_value = 7
@@ -151,7 +151,7 @@ function PropertiesTweakData:init()
 	self.properties.diner = {
 		texture = "textures/properties/msim_diner",
 		text = "msim_diner",
-		value = 7,
+		value = 10,
 		min_value = 100000,
 		feature = "msim_discount_props",
 		feature_value = 5
@@ -160,7 +160,7 @@ function PropertiesTweakData:init()
 	self.properties.common = {
 		texture = "textures/properties/msim_common",
 		text = "msim_common",
-		value = 7,
+		value = 10,
 		min_value = 350000,
 		feature = "msim_increase_pprr",
 		feature_value = 10
@@ -169,7 +169,7 @@ function PropertiesTweakData:init()
 	self.properties.dinoil = {
 		texture = "textures/properties/msim_dinoil",
 		text = "msim_dinoil",
-		value = 10,
+		value = 15,
 		min_value = 450000,
 		feature = "msim_increase_pprr",
 		feature_value = 15
@@ -178,7 +178,7 @@ function PropertiesTweakData:init()
 	self.properties.clubhouse = {
 		texture = "guis/dlcs/bro/textures/pd2/crimenet/biker_01",
 		text = "msim_clubhouse",
-		value = 15,
+		value = 20,
 		min_value = 1250000,
 		feature = "msim_increase_pprr",
 		feature_value = 25
@@ -187,7 +187,7 @@ function PropertiesTweakData:init()
 	self.properties.ranch = {
 		texture = "guis/dlcs/ranc/textures/pd2/crimenet/ranc",
 		text = "msim_ranch",
-		value = 20,
+		value = 25,
 		min_value = 5750000,
 		feature = "msim_increase_max_props",
 		feature_value = 4
@@ -196,7 +196,7 @@ function PropertiesTweakData:init()
 	self.properties.teashop = {
 		texture = "guis/dlcs/chas/textures/pd2/crimenet/chas",
 		text = "msim_teashop",
-		value = 15,
+		value = 20,
 		min_value = 1050000,
 		feature = "msim_increase_max_props",
 		feature_value = 3
@@ -205,7 +205,7 @@ function PropertiesTweakData:init()
 	self.properties.carshop = {
 		texture = "textures/properties/msim_carshop",
 		text = "msim_carshop",
-		value = 25,
+		value = 30,
 		min_value = 4475000,
 		feature = "msim_increase_max_props",
 		feature_value = 5

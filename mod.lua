@@ -5,8 +5,8 @@ if not msim then
 	msim.save_path = SavePath .. "msim_settings.txt"
 	msim.settings = {
 		--initial values
-		pp = 100,
-		pprr = 30,
+		pp = 75,
+		pprr = 25,
 
 		propdiscount = 1,
 		propsownedmax = 3,
