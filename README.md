@@ -1,4 +1,4 @@
-# pd2-msim
+# [pd2-msim](https://modworkshop.net/mod/42084)
 ## INSTALL TO MODS
 Payday 2 - The Management Simulator (MSIM) aims to improve the economy of the game by adding a fun management menu and giving currency more uses.
 Read the ingame guide for more info.

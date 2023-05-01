@@ -32,7 +32,7 @@ if not msim then
 		border_size = 5,
 		menu_button_size = 30,
 
-		msim_version = "1.0"
+		msim_version = "1.1"
 	}
 
 	local keys_to_encrypt = {
@@ -1277,12 +1277,12 @@ function MSIMExchangePage:init(parent, navbar, pageholder)
 		sptoxpbutton:SetCallback(function()
 
 		end)
-		self.sptocslider1.min = 0
-		self.sptocslider1.max = 0
-		self.sptocslider2.min = 0
-		self.sptocslider2.max = 0
-		self.sptocslider1:SetValue(0, false)
-		self.sptocslider2:SetValue(0, false)
+		self.sptoccslider1.min = 0
+		self.sptoccslider1.max = 0
+		self.sptoccslider2.min = 0
+		self.sptoccslider2.max = 0
+		self.sptoccslider1:SetValue(0, false)
+		self.sptoccslider2:SetValue(0, false)
 		sptoccbutton:SetText("msim_no_sp")
 		sptoccbutton:SetCallback(function()
 
