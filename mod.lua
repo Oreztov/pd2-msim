@@ -32,7 +32,7 @@ if not msim then
 		border_size = 5,
 		menu_button_size = 30,
 
-		msim_version = "1.1"
+		msim_version = "1.2"
 	}
 
 	local keys_to_encrypt = {
@@ -477,7 +477,7 @@ if not msim then
 								msim:error_message("msim_error_nomoney")
 							elseif msim.settings.propsownedcount == msim.settings.propsownedmax then
 								msim:error_message("msim_error_maxprops")
-							elseif msim.settings.pp < tweak_data.msim.properties[property].value then
+							elseif msim.settings.pp < tweak_data.msim.properties[property].value * msim.pp_multi then
 								msim:error_message("msim_error_nopp")
 							else
 								msim:buy_property(property)
