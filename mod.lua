@@ -32,7 +32,7 @@ if not msim then
 		border_size = 5,
 		menu_button_size = 30,
 
-		msim_version = "1.2"
+		msim_version = "1.3"
 	}
 
 	local keys_to_encrypt = {
