@@ -7,7 +7,7 @@ msim_pprr_text: "구매력 회수율(PPRR): "
 msim_dialog_yes: "네"
 msim_dialog_no: "아니요"
 
-msim_error_toomanyprops: "이미 소유지가 너무 많아 이 소유지를 팔 수 없습니다."
+msim_error_toomanyprops: "소유 중인 부동산이 너무 많아 이 부동산을 팔 수 없습니다."
 msim_error_nomoney: "지출 현금이 부족합니다!"
 msim_error_maxprops: "당신은 이미 최대 부동산을 소유하고 있습니다.!"
 msim_error_nopp: "구매력(PP)이 부족합니다!"
