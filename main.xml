@@ -3,6 +3,7 @@
 	<Localization directory="loc" default="english.yaml">
 		<loc file="english.yaml" language="english" />
 		<loc file="schinese.yaml" language="schinese" />
+		<loc file="korean.yaml" language="korean" />
 	</Localization>
 	<AddFiles directory="assets" auto_generate="true">
 		
