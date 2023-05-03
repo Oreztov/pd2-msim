@@ -32,7 +32,7 @@ if not msim then
 		border_size = 5,
 		menu_button_size = 30,
 
-		msim_version = "1.3"
+		msim_version = "1.4"
 	}
 
 	local keys_to_encrypt = {
@@ -469,7 +469,7 @@ if not msim then
 				},
 				create_items = function(menu)
 					menu:Button({
-						text = "msim_dialog_yes",
+						text = "dialog_yes",
 						text_align = "center",
 						localized = true,
 						on_callback = function(item)
@@ -486,7 +486,7 @@ if not msim then
 						end
 					})
 					menu:Button({
-						text = "msim_dialog_no",
+						text = "dialog_no",
 						text_align = "center",
 						localized = true,
 						on_callback = function(item)
@@ -510,7 +510,7 @@ if not msim then
 				},
 				create_items = function(menu)
 					menu:Button({
-						text = "msim_dialog_yes",
+						text = "dialog_yes",
 						text_align = "center",
 						localized = true,
 						on_callback = function(item)
@@ -519,7 +519,7 @@ if not msim then
 						end
 					})
 					menu:Button({
-						text = "msim_dialog_no",
+						text = "dialog_no",
 						text_align = "center",
 						localized = true,
 						on_callback = function(item)
@@ -564,7 +564,7 @@ if not msim then
 					},
 					create_items = function(menu)
 						menu:Button({
-							text = "msim_dialog_yes",
+							text = "dialog_yes",
 							text_align = "center",
 							localized = true,
 							on_callback = function(item)
@@ -577,7 +577,7 @@ if not msim then
 							end
 						})
 						menu:Button({
-							text = "msim_dialog_no",
+							text = "dialog_no",
 							text_align = "center",
 							localized = true,
 							on_callback = function(item)
@@ -599,7 +599,7 @@ if not msim then
 					},
 					create_items = function(menu)
 						menu:Button({
-							text = "msim_dialog_yes",
+							text = "dialog_yes",
 							text_align = "center",
 							localized = true,
 							on_callback = function(item)
@@ -612,7 +612,7 @@ if not msim then
 							end
 						})
 						menu:Button({
-							text = "msim_dialog_no",
+							text = "dialog_no",
 							text_align = "center",
 							localized = true,
 							on_callback = function(item)
@@ -634,7 +634,7 @@ if not msim then
 					},
 					create_items = function(menu)
 						menu:Button({
-							text = "msim_dialog_yes",
+							text = "dialog_yes",
 							text_align = "center",
 							localized = true,
 							on_callback = function(item)
@@ -647,7 +647,7 @@ if not msim then
 							end
 						})
 						menu:Button({
-							text = "msim_dialog_no",
+							text = "dialog_no",
 							text_align = "center",
 							localized = true,
 							on_callback = function(item)

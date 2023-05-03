@@ -4,8 +4,6 @@ msim_menu_main_help: "打开Management Simulator (MSIM)模组菜单。"
 msim_close: "关闭 [ESC]"
 msim_pp_text: "购买力: "
 msim_pprr_text: "恢复效率: "
-msim_dialog_yes: "是"
-msim_dialog_no: "否"
 
 msim_error_toomanyprops: "你拥有的地产过多，无法出售地产。"
 msim_error_nomoney: "可用现金不足！"
