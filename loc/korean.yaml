@@ -92,7 +92,7 @@ msim_menu_button_size: "메인 메뉴 버튼 크기(재시작이 필요합니다
 
 msim_increase_max_props: "소유할 수 있는 최대 부동산 수를 $value;로 늘립니다."
 msim_increase_oftosp_rate: "해외 계좌에서 지출 현금로 변환 배율을 $value;% 향상시킵니다."
-msim_increase_sptocc_rate: "지출 현금에서 콘티넨탈 코인으로 변환 배율을 $value;% 향상시킵니다.
+msim_increase_sptocc_rate: "지출 현금에서 컨티넨탈 코인으로 변환 배율을 $value;% 향상시킵니다.
 msim_increase_sptoxp_rate: "지출 현금에서 경험치로 변환 배율을 $value;% 향상시킵니다."
 msim_increase_pprr: "구매력 회수율(PPRR)이 $value;% 증가합니다."
 msim_discount_props: "부동산 비용을 $value;% 할인합니다."
